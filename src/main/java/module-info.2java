@@ -1,0 +1,10 @@
+module com.metait.javafxplayer {
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires javafx.media;
+    requires javafx.web;
+    requires jdk.xml.dom;
+
+    opens com.metait.javafxplayer to javafx.fxml;
+    exports com.metait.javafxplayer;
+}
