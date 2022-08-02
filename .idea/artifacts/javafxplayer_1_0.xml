@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" build-on-make="true" name="javafxplayer-1.0">
+    <output-path>$PROJECT_DIR$/out/artifacts/javafxplayer_1_0</output-path>
+    <root id="root">
+      <element id="archive" name="javafxplayer-1.0.jar">
+        <element id="module-output" name="javafxplayer" />
+      </element>
+    </root>
+  </artifact>
+</component>
