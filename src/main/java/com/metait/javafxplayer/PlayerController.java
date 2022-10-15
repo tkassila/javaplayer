@@ -6,6 +6,7 @@ import com.metait.javafxplayer.bookmark.BookMarkController;
 import com.metait.javafxplayer.daisy2.*;
 import com.metait.javafxplayer.help.HelpController;
 
+import com.sun.jndi.toolkit.url.Uri;
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
 import javafx.application.Platform;
@@ -34,8 +35,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.*;
@@ -53,6 +52,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -133,6 +133,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     @FXML
     private MenuItem menuItemOpenFile;
     @FXML
+    private MenuItem menuItemOpenDaisyFile;
+    @FXML
     private Button buttonPrevLevelLink;
     @FXML
     private Button buttonNextLevelLink;
@@ -188,12 +190,11 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private HashMap<String,SmilIndexLink> hashMapSmilIndexLinks = new HashMap<String,SmilIndexLink>();
     private List<SmilData_Par> allSmilData_ParItems = new ArrayList<>();
     private SmilData_ParMeta metadataSmilDataPar = new SmilData_ParMeta();
-    private HashMap<String, SmilData_ParGroup> metaGroups;
+    private HashMap<String, SmilData_ParGroup> metaGroups = new HashMap<String, SmilData_ParGroup>();
     private SmilData_ParGroup currentMetaGroup = null;
     private final String cnstAllPages = "all-pages";
     private final String cnstSentence = "sentence";
     private final String cnstTimeShift = "timeshift";
-
     private final String cnstParItemsAbovePages = "paritems-above-than-pages";
     private final String cnstParItemsLowerPages = "paritems-lower-than-pages";
     private SmilData_Par currentNormalPage = null;
@@ -202,6 +203,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private int iMaxMetaLevel = 0;
     private SmilData_Par logicalRoot = new SmilData_Par(SmilData_Par.cnstLogicalRoot);
     private HashMap<String, SmilData_Par> lastParentSmilData_Pars = new HashMap<>();
+    private boolean isDaisyNcc = false;
+
     private class DescribeMetaGroups {
         public int iNumberMetaGroups = 0;
         public int iNumberOfPage = 0;
@@ -211,7 +214,13 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     }
     private DescribeMetaGroups describeMetaGroups = new DescribeMetaGroups();
 
-    private int currentTimeShitl = 60 * 1000;
+    enum USER_SELECTED_OPEN_DIR_OR_FILE {
+        DAISY_HTML, AUDIO_FILE, AUDIO_DIRECTORY
+    }
+
+    private USER_SELECTED_OPEN_DIR_OR_FILE user_selected_to_open;
+
+    private final int currentTimeShift = 60 * 1000;
     public void setPrimaryStage(Stage stage)
     {
         primaryStage = stage;
@@ -403,8 +412,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
 
         Gson gson = new Gson();
         PlayerConfig config = new PlayerConfig();
-        config.userRadiobutoonselected = strRadioButtonSelected;
-        config.autobookmark = autoBookMark;
+        config.userRadiobuttonSelected = strRadioButtonSelected;
+        config.autoBookmark = autoBookMark;
         if (bookMarkCollections != null) {
             BookMarkCollection[] arrBMarks = new BookMarkCollection[bookMarkCollections.size()];
             arrBMarks = bookMarkCollections.toArray(arrBMarks);
@@ -598,7 +607,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             double playTime = mediaControlPane.getCurrentTime();
             double playDuration = mediaControlPane.getDuration();
             if (level_direction == PAR_LEVEL_DIRECTION.DOWNWARD_PAR_LEVEL_DIRECTION) {
-                if (playDuration < (playTime +this.currentTimeShitl))
+                if (playDuration < (playTime +this.currentTimeShift))
                 {
                     NewSelectedFile newFile = getPossibleNextPlayfile();
                     if (newFile == null)
@@ -606,7 +615,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     File newF = newFile.newSelectedfile;
                     if (newF == null)
                         return;
-                    double newBeginTime = playDuration - (playTime -this.currentTimeShitl);
+                    double newBeginTime = playDuration - (playTime -this.currentTimeShift);
                     if (newBeginTime < 1)
                         mediaControlPane.playThisFile(newF, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
                     else {
@@ -614,14 +623,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     }
                 }
                 else
-                    mediaControlPane.setForwardAfterMilliSecs(this.currentTimeShitl);
+                    mediaControlPane.setForwardAfterMilliSecs(this.currentTimeShift);
             }
             else {
-                if ((playTime - this.currentTimeShitl) < 1 )
+                if ((playTime - this.currentTimeShift) < 1 )
                 {
-                    double newBeginTime = (this.currentTimeShitl - playTime);
+                    double newBeginTime = (this.currentTimeShift - playTime);
                     if (newBeginTime < 1)
-                        newBeginTime = (playTime -this.currentTimeShitl);
+                        newBeginTime = (playTime -this.currentTimeShift);
                     File newF = getPossibleEarlierFile();
                     if (newF == null)
                         return;
@@ -633,7 +642,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     }
                 }
                 else
-                    mediaControlPane.setBackwardAfterMilliSecs(this.currentTimeShitl);
+                    mediaControlPane.setBackwardAfterMilliSecs(this.currentTimeShift);
             }
             return;
         }
@@ -1031,6 +1040,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         if (bc != null && newBookMark != null)
         {
      ; //       bc.
+            // TODO: MISSING IMPLEMENTATION !!
         }
         return ret;
     }
@@ -1060,12 +1070,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 return null;
             if (fPlay.getName().endsWith(".html")
                     || daisyIndexFile.getName().endsWith(".html")
-                    || daisyIndexFile.getName().endsWith(".htm"))
+                    || daisyIndexFile.getName().endsWith(".htm")) {
                 ret = BookMarkCollection.BOOKMARK_TYPE.DAISY;
+                isDaisyNcc = true;
+            }
             else
             if (!fPlay.getName().endsWith(".html")
                     && !(daisyIndexFile.getName().endsWith(".html")
-                    || daisyIndexFile.getName().endsWith(".htm"))) {
+                    || !daisyIndexFile.getName().endsWith(".htm"))) {
                 File fPath = newBookMark.getDirfile();
                 if (fPath == null)
                     ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_FILE;
@@ -1142,7 +1154,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                         }
                 }
             }catch (Exception e){
-                labelMsg.setText("File tryed read: " +propsLevels.getAbsolutePath()) ;
+                labelMsg.setText("File had try to read: " +propsLevels.getAbsolutePath()) ;
             }
         }
         else
@@ -1165,6 +1177,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         try {
             SmilData.m_setter = this;
             readLevelReservedWordsAndLevels();
+
+            buttonPrevLevelLink.setDisable(true);
+            buttonNextLevelLink.setDisable(true);
 
             FXMLLoader fxmlLoader = new FXMLLoader(HelpController.class.getResource("javafxplayerhelp.fxml"));
             helpController = new HelpController();
@@ -1254,7 +1269,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             config = gson.fromJson(strJson, PlayerConfig.class);
             if (config != null)
             {
-                autoBookMark = config.autobookmark;
+                autoBookMark = config.autoBookmark;
                 BookMarkCollection [] arrBms = config.userBookmarks;
                 if (arrBms == null || arrBms.length == 0)
                     return null;
@@ -1349,7 +1364,6 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         initializeHelp();
 
         bookMarkCollections = getBookMarks();
-
         labelMsg.setAccessibleRole(AccessibleRole.TEXT);
         labelMsg.setFocusTraversable(true);
 
@@ -1429,6 +1443,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     labelSeleectedFile.setText(dirFile.getAbsolutePath());
                     selectedDirectory = dirFile;
                     arrAudioFiles = dirFile.listFiles(audiofilter);
+                    fileChooser.setInitialDirectory(dirChooser);
+                    if (dirChooser != null)
+                        directoryChooser.setInitialDirectory(dirChooser);
                     autoBookMarkPressedPlayButton(autoBookMark);
                 }
                 else {
@@ -1440,6 +1457,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                         dirChooser = dirFile;
                         arrAudioFiles = dirFile.listFiles(audiofilter);
                         daisyIndexFile = new File(htmlDirPath);
+                        fileChooser.setInitialDirectory(dirChooser);
+                        if (dirChooser != null)
+                            directoryChooser.setInitialDirectory(dirChooser);
                     }
                     autoBookMarkPressedPlayButton(autoBookMark);
                 }
@@ -1798,24 +1818,98 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             directoryChooser.setInitialDirectory(dirChooser);
         selectedDirectory = directoryChooser.showDialog(this.primaryStage);
         if (selectedDirectory != null && selectedDirectory.exists()) {
+            user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_DIRECTORY;
+            isDaisyNcc = false;
             dirChooser = selectedDirectory;
             bWebViewLoaded = false;
             labelSeleectedFile.setText(selectedDirectory.getAbsolutePath());
-            webView.getEngine().load(null);
+           // webView.getEngine().load(null);
+            Platform.runLater(new Runnable() {
+                public void run() {
+                    webView.getEngine().setJavaScriptEnabled(false);
+                    webView.getEngine().load(null);
+                    webView.getEngine().setJavaScriptEnabled(true);
+                    try {
+                        Thread.sleep(250);
+                    }catch (Exception e){
+                    }
+                }
+            });
             pressedPlayButton();
         }
     }
 
     @FXML
+    protected void pressedDaisyFileButton()
+    {
+        pressedAudioFileButtonFrom(false);
+    }
+
+    @FXML
     protected void pressedAudioFileButton() {
+        pressedAudioFileButtonFrom(true);
+    }
+
+    private void pressedAudioFileButtonFrom(boolean bCalledFromAudioButtonPressed) {
+        if (bCalledFromAudioButtonPressed) {
+            fileChooser.getExtensionFilters().clear();
+            FileChooser.ExtensionFilter[] extFilters = getFileExtenstionFilters();
+            for (FileChooser.ExtensionFilter ef : extFilters)
+                fileChooser.getExtensionFilters().add(ef);
+        }
+        else
+        {
+            fileChooser.getExtensionFilters().clear();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Daisy html files (*.html)", "*.html"));
+        }
+
         if (fChooser != null)
             fileChooser.setInitialDirectory(fChooser);
         File selectedFile = fileChooser.showOpenDialog(this.primaryStage);
         if (selectedFile != null && selectedFile.exists()) {
+
+            cleanDaisyDataVariables();
+            Platform.runLater(new Runnable() {
+                public void run() {
+                    /*
+                    webView.getEngine().setJavaScriptEnabled(false);
+                    webView.getEngine().load(null);
+                    webView.getEngine().setJavaScriptEnabled(true);
+                     */
+                    mediaControlPane.stop();
+                    try {
+                        Thread.sleep(250);
+                    }catch (Exception e){
+                    }
+                }
+            });
+            if(selectedFile.getName().endsWith(".html") || selectedFile.getName().endsWith(".htm"))
+            {
+                isDaisyNcc = true;
+                user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML;
+            }
+            else
+            {
+                if (isDaisyNcc) // earlier selected file was daisy
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                    webView.getEngine().setJavaScriptEnabled(false);
+                    webView.getEngine().load(null);
+                    webView.getEngine().setJavaScriptEnabled(true);
+                        }
+                    });
+                try {
+                    Thread.sleep(250);
+                }catch (Exception e){
+                }
+                isDaisyNcc = false;
+                user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_FILE;
+            }
             fChooser = selectedFile.getParentFile();
             labelSeleectedFile.setText(selectedFile.getAbsolutePath());
             selectedDirectory = null;
-            webView.getEngine().load(null);
+           // if (webView.getEngine().getLocation() != null)
+         //   webView.getEngine().load(null);
             pressedPlayButton();
         }
     }
@@ -1832,6 +1926,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 if (selectedFile.isDirectory()) {
                     bWebViewLoaded = false;
                     playDirectory(selectedFile, autoBookMark);
+                    updateSplitPaneDividerPosition();
                 }
                 else {
                     bWebViewLoaded = false;
@@ -1840,6 +1935,38 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 }
             }
         }
+    }
+
+    private void cleanDaisyDataVariables()
+    {
+        iSelectedSmilParLevel = 0; // user selected smil par item level; 0 = all!
+        par_level_direction = PAR_LEVEL_DIRECTION.UPWARD_PAR_LEVEL_DIRECTION;
+        iMaxSmilParLevelNormalPage = 0;
+        hashMapSmils = new HashMap<String,String>();
+        listSmils = new ArrayList<String>();
+        hashMapHRefs = new HashMap<String, SmilData>();
+        hashMapSmilData = new HashMap<String,SmilData>();
+        listMp3Files = new ArrayList<File>();
+        hashMapMp3Files = new HashMap<String,File>();
+        arrAudioFiles = null;
+        iIndArrDirFiles = -1;
+        bPreventIncreaseArrayIndex = new AtomicBoolean(false);
+        speechLanaguage = "fi";
+        daisyIndexFile = null;
+        dCurrentPosition = -1.0;
+        hashMapLevelHeaderWords = new HashMap<String,Integer>();
+        hashMapSmilIndexLinks = new HashMap<String,SmilIndexLink>();
+        allSmilData_ParItems = new ArrayList<>();
+        metadataSmilDataPar = new SmilData_ParMeta();
+        metaGroups = new HashMap<String, SmilData_ParGroup>();
+        currentMetaGroup = null;
+        currentNormalPage = null;
+        currentHeader = null;
+        bCreateMetaLevelsAbovePages = false;
+        iMaxMetaLevel = 0;
+        logicalRoot = new SmilData_Par(SmilData_Par.cnstLogicalRoot);
+        lastParentSmilData_Pars = new HashMap<>();
+        describeMetaGroups = new DescribeMetaGroups();
     }
 
     private void playThisFile(File selectedFile) {
@@ -1930,13 +2057,16 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         if ( selectedFile != null && (!selectedFile.getName().endsWith(".html")
             && !selectedFile.getName().endsWith(".htm")))
         {
-            webEngine.load(null);
+       //     webEngine.load(null);
             daisyIndexFile = null;
         }
         m_selectedFile = selectedFile;
 
         if (selectedFile.getName().endsWith(".html") || selectedFile.getName().endsWith(".htm"))
         {
+            isDaisyNcc = true;
+            buttonPrevLevelLink.setDisable(false);
+            buttonNextLevelLink.setDisable(false);
             speechLanaguage = getSpeechLanguage(selectedFile);
             readMediaContentData(selectedFile);
             bWebViewLoaded = true;
@@ -1948,6 +2078,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             buttonNextLink.setDisable(false);
             buttonLowerLevel.setDisable(false);
             buttonUpperLevel.setDisable(false);
+            buttonPlay.setDisable(false);
 
             if (autoBookMark != null && autoBookMark.getDaisybookindexpath() != null) {
                 m_selectedFile = new File(autoBookMark.getPlayfilepath());
@@ -1987,8 +2118,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private void updateSplitPaneDividerPosition()
     {
         boolean bMetaData = mediaControlPane.isMetaData();
-        splitPane.setDividerPositions(0.2);
+       // splitPane.setDividerPositions(0.2);
         callUpdateSplitPaneDividerPosition(bMetaData, null);
+        // splitPane.setDividerPositions(1);
     }
 
     public boolean isVideoFile(File f)
@@ -2005,11 +2137,45 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     public void callUpdateSplitPaneDividerPosition(boolean bValue, String metadata)
     {
         boolean bMetaData = mediaControlPane.isMetaData();
-        if (isVideoFile(m_selectedFile))
-        {
+/*        mediaScrollPane.setMinWidth(0);
+        mediaScrollPane.setMinHeight(0);
+ */
+        if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_DIRECTORY) {
             splitPane.setDividerPositions(1);
             return;
         }
+        else
+        if(user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML) {
+            splitPane.setDividerPositions(0.3);
+            return;
+        }
+        else
+        if(user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_FILE) {
+            splitPane.setDividerPositions(0.6);
+            return;
+        }
+        /*
+        if (isVideoFile(m_selectedFile) ||!(m_selectedFile.getName().endsWith(".html")
+                || m_selectedFile.getName().endsWith(".htm")) && !isDaisyNcc )
+        {
+            if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML
+                || user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_DIRECTORY)
+                splitPane.setDividerPositions(1);
+            else {
+                if (bMetaData)
+                    splitPane.setDividerPositions(0.4);
+                else
+                    splitPane.setDividerPositions(0.2);
+            }
+
+            ?*
+            mediaScrollPane.setMinWidth(mediaScrollPane.getPrefWidth());
+            mediaScrollPane.setMinHeight(mediaScrollPane.getPrefHeight());
+            mediaScrollPane.setMinHeight(0);
+             *?
+            return;
+        }
+        */
         if (bMetaData)
             splitPane.setDividerPositions(0.4);
         else
@@ -2156,6 +2322,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         {
             scrollIntoWebView(indSelectedFile);
         }
+        updateSplitPaneDividerPosition();
         mediaControlPane.playThisFile(m_selectedFile, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
     }
 
@@ -2201,7 +2368,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             String href = sd.getHref();
             String key = getKeyFromSmilHref(href);
          //   String value = getValueFromSmilHref(href);
-            execJs = "document.getElementById(" +'"' + key +'"' +").scrollIntoView();";
+            String docExec = "document.getElementById(\"" + key +"\")";
+            execJs = "if (document != undefined && document != null && " +docExec +" != undefined && " +docExec +" != null) document.getElementById(" +'"' + key +'"' +").scrollIntoView();";
+            // System.out.println("execJs=" +execJs);
             if (key != null) {
                 Platform.runLater(new Runnable() {
                     public void run() {
@@ -2251,6 +2420,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         {
             scrollIntoWebView(indSelectedFile);
         }
+        updateSplitPaneDividerPosition();
         mediaControlPane.playThisFile(m_selectedFile, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
         bPreventIncreaseArrayIndex.set(false);
     }
@@ -2351,10 +2521,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         {
             sd = hashMapSmilData.get(key);
             if (sd == null) {
-                System.out.println("");
+                System.out.println("sd == null");
                 continue;
             }
             pair = readSmilData(key);
+            if (pair == null)
+            {
+                System.out.println("stop");
+            }
             sd.setPair(pair);
             sd.setIndexOfSmilFile(i);
             if (sd.getSmilDataParsItems()!=null) {
@@ -2388,7 +2562,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         allSmilData_ParItems = getUpdatedSmilDataParsItems(allSmilData_ParItems);
      //   ddd
 
-       if (!bCreateMetaLevelsAbovePages)
+       if (!bCreateMetaLevelsAbovePages && isDaisyNcc)
           createMetaLevelsAbovePages();
 
         int max = listMp3Files.size();
@@ -2492,6 +2666,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
 
     private void createMetaLevelsAbovePages()
     {
+        // TODO: !! metaGroups == NULL: metaGroups = metadataSmilDataPar.getMetagroups();
         SmilData_ParGroup allPageGroup = new SmilData_ParGroup();
         allPageGroup.setSameGroupNames(false);
 //        SmilData_ParGroup specialPageGroup = new SmilData_ParGroup();
@@ -2501,11 +2676,13 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                  allPageGroup.addSmilDataPar(par);
         }
         allPageGroup.setStrGroupName(cnstAllPages);
-        metaGroups.put(allPageGroup.getStrGroupName(), allPageGroup);
+        if (metaGroups != null)
+            metaGroups.put(allPageGroup.getStrGroupName(), allPageGroup);
 
         SmilData_ParGroup sentenceGroup = new SmilData_ParGroup();
         sentenceGroup.setStrGroupName(cnstSentence);
-        metaGroups.put(cnstSentence, sentenceGroup);
+        if (metaGroups != null)
+            metaGroups.put(cnstSentence, sentenceGroup);
 
         SmilData_ParGroup timeshiftGroup = new SmilData_ParGroup();
         sentenceGroup.setStrGroupName(cnstTimeShift);
@@ -2952,6 +3129,11 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     ret = ret.replace("file://", "");
                     if (File.separatorChar == '\\' && ret.startsWith("/"))
                         ret = ret.substring(1);
+                    try {
+                        ret = URLDecoder.decode(ret, "utf-8");
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -3079,7 +3261,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         if (bPreventIncreaseArrayIndex.get())
             return;
         bPreventIncreaseArrayIndex.set(true);
-        System.out.println("handleLinkClick href=" +href);
+        // System.out.println("handleLinkClick href=" +href);
         String key = getKeyFromSmilHref(href);
         String fname = getValueFromSmilHref(href);
         SmilData sm = hashMapSmilData.get(fname);

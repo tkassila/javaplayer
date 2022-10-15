@@ -18,7 +18,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.web.WebView?>
 
-<ScrollPane fx:id="scrollPaneMain" fitToHeight="true" fitToWidth="true" prefHeight="634.0" prefWidth="838.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1">
+<ScrollPane fx:id="scrollPaneMain" fitToHeight="true" fitToWidth="true" prefHeight="634.0" prefWidth="838.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
    <content>
       <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="468.0" prefWidth="648.0" spacing="3.0">
           <padding>
@@ -30,12 +30,17 @@
                <items>
                  <MenuItem id="open_audio_dir" fx:id="menuItemOpenDir" mnemonicParsing="false" onAction="#pressedAudioDirButton" text="Open audio directory">
                         <accelerator>
-                           <KeyCodeCombination alt="DOWN" code="D" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                           <KeyCodeCombination alt="DOWN" code="M" control="UP" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                      </MenuItem>
-                     <MenuItem id="open_audio_file_or_daisy_book_index_html" fx:id="menuItemOpenFile" mnemonicParsing="false" onAction="#pressedAudioFileButton" text="Open audio or daisy book file">
+                     <MenuItem id="open_audio_file_or_daisy_book_index_html" fx:id="menuItemOpenFile" mnemonicParsing="false" onAction="#pressedAudioFileButton" text="Open audio file">
                         <accelerator>
                            <KeyCodeCombination alt="DOWN" code="F" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                        </accelerator>
+                     </MenuItem>
+                     <MenuItem id="open_audio_file_or_daisy_book_index_html" fx:id="menuItemOpenDaisyFile" mnemonicParsing="false" onAction="#pressedDaisyFileButton" text="Open daisy book html file">
+                        <accelerator>
+                           <KeyCodeCombination alt="DOWN" code="D" control="UP" meta="UP" shift="UP" shortcut="UP" />
                         </accelerator>
                      </MenuItem>
                      <MenuItem mnemonicParsing="false" onAction="#pressedExitApp" text="Exist" />

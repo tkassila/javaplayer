@@ -547,8 +547,12 @@ public class MediaControlPane extends BorderPane {
 
     public void playThisFile(File selectedFile, double beginClip,
                              int p_iIndArrDirFiles, int iArraySize, String clickedText) {
-        if(mp != null && mp.getStatus() == MediaPlayer.Status.PLAYING){
+        if(mp != null && mp.getStatus() == MediaPlayer.Status.PLAYING) {
             mp.stop();
+            try {
+                Thread.sleep(500);
+            } catch (Exception e){
+            }
         }
         else
         {

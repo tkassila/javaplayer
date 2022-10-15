@@ -5,6 +5,6 @@ import com.metait.javafxplayer.bookmark.BookMarkCollection;
 
 public class PlayerConfig {
     public BookMarkCollection [] userBookmarks;
-    public String userRadiobutoonselected;
-    public BookMark autobookmark;
+    public String userRadiobuttonSelected;
+    public BookMark autoBookmark;
 }
