@@ -13,6 +13,7 @@ When application is started, press some of short keys:
 
 ### Daisy book features
 
+Help-, bookmark buttons are not implemented yet. Now application is storing last selected directory or mp file or daisy html file into configuration files under user home directory.
 
 ### Play user interface
 
