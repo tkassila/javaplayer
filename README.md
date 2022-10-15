@@ -26,6 +26,8 @@ Help-, bookmark buttons are not implemented yet. Now application is storing last
 
 Buttons 4 - 6 are corresponds buttons existing on Daisy 2 device like Victor etc.
 
+On volume control + key is playing louder sound and - key means quieter sound.
+
 ### Player file types
 
 This java player can play or show next kind of files:
