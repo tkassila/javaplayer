@@ -9,6 +9,7 @@ public class BookMark {
     public static final String cnstBookMark_playpath = "playpath";
     public static final String cnstBookMark_playdirindex = "playdirindex";
     public static final String cnstBookMark_position = "position";
+    public static final String cnstBookMark_type = "type";
 
     private String strName = "";
     private String strPlayFilePath = "";
@@ -18,6 +19,7 @@ public class BookMark {
     private String strDaisyBookIndexPath = "";
     private String strIndArrDirFiles = "";
 
+    private String strType = "";
     private File fAudioFile = null;
     private File daisyFile = null;
     private File fDirFile = null;
@@ -44,6 +46,12 @@ public class BookMark {
 
     public void setDirpath(String strDirPath) {
         this.strSelectedDirPath = strDirPath;
+    }
+    public String getType() {
+        return strType;
+    }
+    public void setType(String strType) {
+        this.strType = strType;
     }
 
     public File getDirfile() {
@@ -76,6 +84,7 @@ public class BookMark {
                 +" strDaisyBookIndexPath=" +strDaisyBookIndexPath +"\n"
                 +" strIndArrDirFiles=" +strIndArrDirFiles +"\n"
                 +" dBookMarkPosition=" +dBookMarkPosition +"\n"
+                +" dBookMarkType=" +strType +"\n"
                 +" bookMarkDate=" +bookMarkDate;
     }
 

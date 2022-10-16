@@ -25,6 +25,14 @@ public class HelpLinkRedirectListener implements ChangeListener<Worker.State>, E
 
     private final WebView webView;
     private HelpController m_helpController;
+    private boolean loadAddListener = false;
+    public void setLoadAddListener(boolean value)
+    {
+        loadAddListener = value;
+    }
+    public boolean getLoadAddListener() {
+        return loadAddListener;
+    }
 
     public HelpLinkRedirectListener(WebView webView, HelpController helpController)
     {
@@ -34,14 +42,27 @@ public class HelpLinkRedirectListener implements ChangeListener<Worker.State>, E
 
 
     private void showNodeContent(Node n, int depth) {
+        if (loadAddListener)
+            return;
+
         for (int i=0; i<depth; i++) {
             System.out.print(" ");
         }
         System.out.println(n.getNodeName()+":"+n.getNodeValue());
-        NodeList children = n.getChildNodes() ;
+        NodeList children = n.getChildNodes();
+        if (children == null || children.getLength() == 0)
+            return;
+        // webView.getEngine().
+      //  webViewHelp.
+        for (int i=0; i<1; i++) {
+            showNodeContent(children.item(i), depth+1);
+        }
+        m_helpController.setLoadAddListener(true);
+        /*
         for (int i=0; i<children.getLength(); i++) {
             showNodeContent(children.item(i), depth+1);
         }
+         */
     }
 
     @Override

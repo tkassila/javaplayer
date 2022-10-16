@@ -105,19 +105,19 @@
                      <Insets bottom="5.0" top="5.0" />
                   </padding>
                </HBox>
-               <HBox prefHeight="40.0" prefWidth="319.0" spacing="5.0">
+               <HBox prefHeight="40.0" prefWidth="517.0" spacing="5.0">
                   <children>
-                     <Button fx:id="buttonUpperLevel" accessibleHelp="play previous audio link from daisy book" accessibleText="play previous audio link from daisy book" onAction="#pressedButtonUpperLevel" prefHeight="30.0" prefWidth="178.0" style="-fx-font-weight: bold;" text="Upper level in index" />
-                     <Button fx:id="buttonLowerLevel" accessibleHelp="play next audio link from daisy book" accessibleText="play next audio link from daisy book" onAction="#pressedButtonLowerLevel" prefHeight="30.0" prefWidth="171.0" style="-fx-font-weight: bold;" text="Lower level  in index" />
+                     <Button fx:id="buttonUpperLevel" accessibleHelp="play previous audio link from daisy book" accessibleText="play previous audio link from daisy book" onAction="#pressedButtonUpperLevel" prefHeight="30.0" prefWidth="261.0" style="-fx-font-weight: bold;" text="Select upper one from index levels" />
+                     <Button fx:id="buttonLowerLevel" accessibleHelp="play next audio link from daisy book" accessibleText="play next audio link from daisy book" onAction="#pressedButtonLowerLevel" prefHeight="30.0" prefWidth="253.0" style="-fx-font-weight: bold;" text="Select lower one from index levels" />
                   </children>
                   <padding>
                      <Insets bottom="5.0" top="5.0" />
                   </padding>
                </HBox>
-               <HBox layoutX="531.0" layoutY="10.0" prefHeight="40.0" prefWidth="314.0" spacing="5.0">
+               <HBox layoutX="531.0" layoutY="10.0" prefHeight="40.0" prefWidth="459.0" spacing="5.0">
                   <children>
-                     <Button fx:id="buttonPrevLevelLink" accessibleHelp="play previous audio link from daisy book" accessibleText="play previous audio link from daisy book" onAction="#pressedButtonPrevLevelLink" prefHeight="30.0" prefWidth="170.0" style="-fx-font-weight: bold;" text="Previous level index" />
-                     <Button fx:id="buttonNextLevelLink" accessibleHelp="play next audio link from daisy book" accessibleText="play next audio link from daisy book" onAction="#pressedButtonNextLevelLink" prefHeight="30.0" prefWidth="141.0" style="-fx-font-weight: bold;" text="Next level index" />
+                     <Button fx:id="buttonPrevLevelLink" accessibleHelp="play previous audio link from daisy book" accessibleText="play previous audio link from daisy book" onAction="#pressedButtonPrevLevelLink" prefHeight="30.0" prefWidth="241.0" style="-fx-font-weight: bold;" text="Previous index in selected level" />
+                     <Button fx:id="buttonNextLevelLink" accessibleHelp="play next audio link from daisy book" accessibleText="play next audio link from daisy book" onAction="#pressedButtonNextLevelLink" prefHeight="30.0" prefWidth="211.0" style="-fx-font-weight: bold;" text="Next index in selected level" />
                   </children>
                   <padding>
                      <Insets bottom="5.0" top="5.0" />

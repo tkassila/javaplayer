@@ -2,6 +2,7 @@ package com.metait.javafxplayer.help;
 
 import com.metait.javafxplayer.HyperLinkRedirectListener;
 import javafx.application.Platform;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TreeView;
@@ -63,6 +64,15 @@ public class HelpController {
     private boolean bTreeViewExpanded = false;
     private TreeItem<TreeItemString> rootItem = null;
     private String strHelp = null;
+    private HelpLinkRedirectListener linkRedirectListener = null;
+    private boolean loadAddListener = false;
+    public void setLoadAddListener(boolean value)
+    {
+        loadAddListener = value;
+    }
+    public boolean getLoadAddListener() {
+        return loadAddListener;
+    }
 
     @FXML
     public void initialize() {
@@ -74,7 +84,18 @@ public class HelpController {
         WebEngine webEngine = webViewHelp.getEngine();
         bLoaded = false;
         webEngine.setJavaScriptEnabled(true);
-        webEngine.getLoadWorker().stateProperty().addListener(new HelpLinkRedirectListener(webViewHelp, this));
+        webEngine.getLoadWorker().stateProperty().addListener((ov,oldState,newState)->{
+            if(newState== Worker.State.SCHEDULED){
+                System.out.println("state: scheduled");
+            } else if(newState== Worker.State.RUNNING){
+                System.out.println("state: running");
+            } else if(newState== Worker.State.SUCCEEDED){
+                System.out.println("state: succeeded");
+                loadAddListener = true;
+            }
+        });
+        linkRedirectListener = new HelpLinkRedirectListener(webViewHelp, this);
+        webEngine.getLoadWorker().stateProperty().addListener(linkRedirectListener);
 
         strHelp = getHelpHtml("help.html");
         // webEngine.load(strHelp);
@@ -86,7 +107,6 @@ public class HelpController {
                 // newValue represents the selected itemTree
                 treeItemChanded(oldValue, newValue);
             }
-
         });
         pressedButtonTreeView();
      //   System.out.println("handleLinkClick end => bLoaded=" +bLoaded);
@@ -108,6 +128,15 @@ public class HelpController {
             if (idNode == null)
                 return;
             String id = idNode.getNodeValue();
+            // this works all ways: next two staetments are helping clean earlier selections
+            WebEngine webEngine = webViewHelp.getEngine();
+            if (linkRedirectListener != null) {
+                webEngine.getLoadWorker().stateProperty().removeListener(linkRedirectListener);
+                linkRedirectListener = null;
+            }
+            webEngine.loadContent(strHelp);
+            webEngine.reload();
+
             if (id != null)
                 scrollInto(id);
         }
@@ -440,7 +469,7 @@ public class HelpController {
             execJs3 = null;
             if (htmlid != null)
                 // execJs3 = getBackGroundOf(htmlid, "white");
-                execJs3 = "window.location.reload();\n"
+                execJs3 = "window.location.reload();\n "
                         + "function delay(time) {\n"
                         +"  return new Promise(resolve => setTimeout(resolve, time));\n"
                        +"}\n\n"
@@ -452,7 +481,7 @@ public class HelpController {
                  +  "setItemAndChildrenIntoWhite(c[i]);"
                   +  "}\n}"
                   + "setItemAndChildrenIntoWhite(document.body);\n"
-                        +" delay(500);";
+                        +"  "; // delay(1000);
             /*    "  c[i].style.backgroundColor = \"white\";\n" + */
 
                /*
@@ -486,7 +515,7 @@ public class HelpController {
                     if (engine != null) {
 
                         if (execJs3 != null) {
-                            //engine.executeScript(execJs3);
+                            // engine.executeScript(execJs3);
                             engine.executeScript("document.body.style.backgroundColor = 'white';");
                             engine.executeScript(execJs3);
                             try {  // this needed here, because above js is fully done
@@ -546,6 +575,7 @@ public class HelpController {
             showTreeViewTreeItemsExceptTrrRoot();
             bTreeViewExpanded = true;
         }
+        WebEngine webEngine = webViewHelp.getEngine();
     }
 
     private void hideTreeViewTreeItemsExceptTrrRoot()

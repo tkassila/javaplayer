@@ -386,6 +386,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
           //  autoBookMark.setBookMarkDate(new Date(Calendar.getInstance().getTime()));
             // autoBookMarkCollection.setBookMarkPosition(currenttime);
             autoBookMark.setPlayfilepath(playFile.getAbsolutePath());
+            autoBookMark.setType(getUserSelectedOpenFileType(user_selected_to_open));
             if (selectedDirectory != null)
                 autoBookMark.setDirpath(selectedDirectory.getAbsolutePath());
             autoBookMark.setName("autobookmark");
@@ -440,6 +441,19 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 }
             }
         }
+    }
+
+    private String getUserSelectedOpenFileType( USER_SELECTED_OPEN_DIR_OR_FILE user_selected_to_open)
+    {
+        if (user_selected_to_open == null)
+            return "";
+        if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_DIRECTORY)
+            return "DIR";
+        if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_FILE)
+            return "FILE";
+        if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML)
+            return "DAISY";
+        return "";
     }
 
     private void setRemoveWarningLabelMsg(Boolean newValue, RadioButton rb)
@@ -1063,28 +1077,31 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         if (newBookMark == null)
             return null;
         String strPlayFile = newBookMark.getPlayfilepath();
-        if (strPlayFile != null)
-        {
+        String strType = newBookMark.getType();
+        if (strPlayFile != null) {
             File fPlay = new File(strPlayFile);
             if (!fPlay.exists())
                 return null;
             if (fPlay.getName().endsWith(".html")
-                    || daisyIndexFile.getName().endsWith(".html")
-                    || daisyIndexFile.getName().endsWith(".htm")) {
+                    || fPlay.getName().endsWith(".html")
+                    || fPlay.getName().endsWith(".htm")) {
                 ret = BookMarkCollection.BOOKMARK_TYPE.DAISY;
                 isDaisyNcc = true;
-            }
-            else
-            if (!fPlay.getName().endsWith(".html")
-                    && !(daisyIndexFile.getName().endsWith(".html")
-                    || !daisyIndexFile.getName().endsWith(".htm"))) {
-                File fPath = newBookMark.getDirfile();
-                if (fPath == null)
-                    ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_FILE;
-                else
-                    ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_DIR;
+            } else if (fPlay.isDirectory()) {
+                ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_DIR;
+                isDaisyNcc = false;
+            } else {
+                if (strType != null && strType.trim().length()!= 0) {
+                    if (strType.equals("FILE"))
+                        ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_FILE;
+                    else if (strType.equals("DIR"))
+                        ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_DIR;
+                    else if (strType.equals("DAISY"))
+                        ret = BookMarkCollection.BOOKMARK_TYPE.DAISY;
                 }
+                isDaisyNcc = false;
             }
+        }
         return ret;
     }
 
@@ -1224,10 +1241,15 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         }
              */
 
+        boolean isPlaying = mediaControlPane.isPlaying();
+            if (isPlaying)
+                mediaControlPane.pause();
             helpController.scrollInto("main_header");
             buttonHelp.setDisable(true);
             stageHelp.showAndWait();
             buttonHelp.setDisable(false);
+        if (isPlaying)
+            mediaControlPane.pauseOrPlay();
     }
 
     private List<BookMarkCollection> getBookMarks()
@@ -1270,6 +1292,44 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             if (config != null)
             {
                 autoBookMark = config.autoBookmark;
+                if (autoBookMark != null)
+                {
+                    String strFile = autoBookMark.getPlayfilepath();
+                    File fFile = new File(strFile);
+                    File fParent = fFile.getParentFile();
+                    BookMarkCollection.BOOKMARK_TYPE type = getBookMarkType(autoBookMark);
+                    if (type == BookMarkCollection.BOOKMARK_TYPE.DAISY) {
+                        user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML;
+                        if (fParent.isDirectory() && !fFile.getName().endsWith(".html"))
+                        {
+                            File fNccFile = new File(fParent.getAbsolutePath()
+                                    +File.separatorChar +"ncc.html");
+                            if (fNccFile.exists())
+                                m_selectedFile = fNccFile;
+                        }
+                    }
+                    else
+                    if (type == BookMarkCollection.BOOKMARK_TYPE.AUDIO_DIR) {
+                        user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_DIRECTORY;
+                    }
+                    else
+                    if (type == BookMarkCollection.BOOKMARK_TYPE.AUDIO_FILE) {
+                        user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_FILE;
+                    }
+
+                    if (fFile != null && fFile.isDirectory()) {
+                        directoryChooser.setInitialDirectory(fFile);
+                        fileChooser.setInitialDirectory(fFile);
+                    }
+                    else
+                        if (fFile != null)
+                        {
+                            if (fParent != null && fParent.isDirectory()) {
+                                directoryChooser.setInitialDirectory(fParent);
+                                fileChooser.setInitialDirectory(fParent);
+                            }
+                        }
+                }
                 BookMarkCollection [] arrBms = config.userBookmarks;
                 if (arrBms == null || arrBms.length == 0)
                     return null;
@@ -1429,8 +1489,10 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         if (autoBookMark != null)
         {
             String strAudioFile = autoBookMark.getPlayfilepath();
-            if (strAudioFile != null)
+            if (m_selectedFile == null && user_selected_to_open != USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML)
                 m_selectedFile = new File(strAudioFile);
+         //   if (strAudioFile != null)
+           //     m_selectedFile = new File(strAudioFile);
             if (m_selectedFile != null && m_selectedFile.exists()) {
                 labelSeleectedFile.setText(m_selectedFile.getAbsolutePath());
                 String strDir = autoBookMark.getDirpath();
@@ -1439,7 +1501,16 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     dirFile = new File(strDir);
                     dirChooser = dirFile;
                 }
-                if (dirFile != null && dirFile.exists() && dirFile.isDirectory()) {
+                else
+                {
+                    File fParent = m_selectedFile.getParentFile();
+                    if (fParent.isDirectory()) {
+                        dirFile = fParent;
+                        dirChooser = dirFile;
+                    }
+                }
+                if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_DIRECTORY &&
+                        dirFile != null && dirFile.exists() && dirFile.isDirectory()) {
                     labelSeleectedFile.setText(dirFile.getAbsolutePath());
                     selectedDirectory = dirFile;
                     arrAudioFiles = dirFile.listFiles(audiofilter);
@@ -1461,6 +1532,17 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                         if (dirChooser != null)
                             directoryChooser.setInitialDirectory(dirChooser);
                     }
+                    else
+                        if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML)
+                        {
+                            labelSeleectedFile.setText(m_selectedFile.getAbsolutePath());
+                            dirFile = m_selectedFile.getParentFile();
+                            selectedDirectory = null;
+                            dirChooser = dirFile;
+                            arrAudioFiles = dirFile.listFiles(audiofilter);
+                            daisyIndexFile = m_selectedFile;
+                        }
+
                     autoBookMarkPressedPlayButton(autoBookMark);
                 }
             }
@@ -3349,6 +3431,18 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             case DIGIT3:
                 if (!buttonNextLink.isDisabled())
                     pressedButtonNextLink(); break;
+            case Q:
+                if (!buttonUpperLevel.isDisabled())
+                    pressedButtonUpperLevel(); break;
+            case W:
+                if (!buttonLowerLevel.isDisabled())
+                    pressedButtonLowerLevel(); break;
+            case R:
+                if (!buttonPrevLevelLink.isDisabled())
+                    pressedButtonPrevLevelLink(); break;
+            case T:
+                if (!buttonNextLevelLink.isDisabled())
+                    pressedButtonNextLevelLink(); break;
             case F1:
                 handleF1HelpPressed(event);
 //            case PAGE_UP:
