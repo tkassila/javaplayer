@@ -13,7 +13,7 @@ When application is started, press some of short keys:
 
 ### Daisy book features
 
-Help-, bookmark buttons are not implemented yet. Now application is storing last selected directory or mp file or daisy html file into configuration files under user home directory.
+User bookmarks buttons are not implemented yet. Now application is storing last selected directory or mp file or daisy html file into configuration files under user home directory.
 
 ### Play user interface
 
@@ -27,6 +27,7 @@ Help-, bookmark buttons are not implemented yet. Now application is storing last
 Buttons 4 - 6 are corresponds buttons existing on Daisy 2 device like Victor etc.
 
 On volume control + key is playing louder sound and - key means quieter sound.
+Behind Help button is a dislog showing more comprehend help page content.
 
 ### Player file types
 
