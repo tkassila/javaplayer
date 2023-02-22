@@ -1,7 +1,10 @@
 package com.metait.javafxplayer.bookmark;
 
+import com.metait.javafxplayer.PlayerController;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -17,10 +21,11 @@ import javafx.util.Callback;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BookMarkController {
+
+    private PlayerController playerController = null;
 
     @FXML
     private Button buttonHelpClose;
@@ -34,13 +39,23 @@ public class BookMarkController {
     private ListView<BookMarkCollection> listViewCollections;
     @FXML
     private ListView<BookMark> listViewBookMark;
+    @FXML
+    private TextField textFieldDescription;
 
-    private List<BookMarkCollection> bookMarkCollections = new ArrayList<BookMarkCollection>();
+    private boolean bDescriptionChanged = false;
+    private boolean bGotoBMarkPressed = false;
+    // private List<BookMarkCollection> bookMarkCollections = new ArrayList<BookMarkCollection>();
+    private ObservableList<BookMarkCollection> bookMarkCollections = FXCollections.observableArrayList();
+    public ObservableList<BookMarkCollection> getBookMarkCollections() { return bookMarkCollections; }
+
+    public void setPlayerController(PlayerController playerController){
+        this.playerController = playerController;
+    }
 
     public void setBookMarks(List<BookMarkCollection> items)
     {
         if (items != null)
-            bookMarkCollections = items;
+            bookMarkCollections.addAll(items);
         else
             if (bookMarkCollections != null && items == null)
                 bookMarkCollections.clear();
@@ -54,13 +69,10 @@ public class BookMarkController {
         buttonEditBookmark.defaultButtonProperty().bind(buttonEditBookmark.focusedProperty());
         buttonDeleteBookmark.defaultButtonProperty().bind(buttonDeleteBookmark.focusedProperty());
         buttonGotoBookmark.defaultButtonProperty().bind(buttonGotoBookmark.focusedProperty());
-
-        if (bookMarkCollections.size()==0)
-        {
-            buttonEditBookmark.setDisable(true);
-            buttonDeleteBookmark.setDisable(true);
-            buttonGotoBookmark.setDisable(true);
-        }
+        buttonEditBookmark.setDisable(true);
+        buttonDeleteBookmark.setDisable(true);
+        buttonGotoBookmark.setDisable(true);
+        textFieldDescription.setEditable(false);
 
         if (bookMarkCollections != null) {
             listViewCollections.setCellFactory(new Callback<ListView<BookMarkCollection>, ListCell<BookMarkCollection>>() {
@@ -71,7 +83,7 @@ public class BookMarkController {
                         protected void updateItem(BookMarkCollection t, boolean bln) {
                             super.updateItem(t, bln);
                             if (t != null) {
-                                String strType = "";
+                                String strType = t.getType().toString().replace("_", " ");
                                 /*
                                 BookMarkCollection.BOOKMARK_TYPE type = getBookMarkType(t.getBookMarks());
                                 switch (type)
@@ -87,7 +99,7 @@ public class BookMarkController {
                                         break;
                                 }
                                  */
-                                setText(strType +" " +t.getPlayFilePath() +" ");
+                                setText(strType +" " +t.getName());
                             }
                         }
                     };
@@ -96,18 +108,81 @@ public class BookMarkController {
             });
         }
 
+        buttonEditBookmark.setDisable(true);
+        buttonDeleteBookmark.setDisable(true);
+        buttonGotoBookmark.setDisable(true);
+
+        textFieldDescription.textProperty().addListener(        new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String>  observable, String oldValue, String newValue) {
+                // Your action here
+                //   System.out.println("Selected item: " + newValue);
+                if (oldValue != null && !oldValue.equals(newValue) ) {
+                    bDescriptionChanged = true;
+                    BookMark bm = listViewBookMark.getSelectionModel().getSelectedItem();
+                    if (bm != null) {
+                        bm.setStrDescription(newValue);
+                        listViewBookMark.refresh();
+                    }
+                }
+                else
+                if (newValue != null && !newValue.equals(oldValue) ) {
+                    bDescriptionChanged = true;
+                    BookMark bm = listViewBookMark.getSelectionModel().getSelectedItem();
+                    if (bm != null) {
+                        bm.setStrDescription(newValue);
+                        listViewBookMark.refresh();
+                    }
+                }
+            }
+        });
+
+        listViewBookMark.getSelectionModel().selectedItemProperty().addListener(
+                new ChangeListener<BookMark>() {
+                    @Override
+                    public void changed(ObservableValue<? extends BookMark> observable,
+                                        BookMark oldValue, BookMark newValue) {
+                        // Your action here
+                        //   System.out.println("Selected item: " + newValue);
+                        if (newValue == null) {
+                            buttonEditBookmark.setDisable(true);
+                            buttonDeleteBookmark.setDisable(true);
+                            buttonGotoBookmark.setDisable(true);
+                            return;
+                        }
+                        buttonEditBookmark.setDisable(false);
+                        buttonDeleteBookmark.setDisable(false);
+                        buttonGotoBookmark.setDisable(false);
+                        textFieldDescription.setText(newValue.getStrDescription());
+                    }
+                });
+
         listViewCollections.getSelectionModel().selectedItemProperty().addListener(
                 new ChangeListener<BookMarkCollection>() {
                     @Override
                     public void changed(ObservableValue<? extends BookMarkCollection> observable,
                                         BookMarkCollection oldValue, BookMarkCollection newValue) {
                         // Your action here
-                        System.out.println("Selected item: " + newValue);
+                     //   System.out.println("Selected item: " + newValue);
+                        if (newValue == null)
+                            return;
                         BookMark [] bookMarks = newValue.getBookMarks();
                         listViewBookMark.getItems().clear();
                         if (bookMarks != null && bookMarks.length > 0)
                         {
                             listViewBookMark.getItems().addAll(bookMarks);
+                        }
+                        if (bookMarks.length ==0)
+                        {
+                            buttonEditBookmark.setDisable(true);
+                            buttonDeleteBookmark.setDisable(false);
+                            buttonGotoBookmark.setDisable(true);
+                        }
+                        else
+                        {
+                            buttonEditBookmark.setDisable(true);
+                            buttonDeleteBookmark.setDisable(true);
+                            buttonGotoBookmark.setDisable(true);
                         }
                     }
         });
@@ -126,12 +201,24 @@ public class BookMarkController {
     public void pressedButtonGotoBookmark()
     {
         System.out.println("pressedButtonGotoBookmark");
+        if (playerController != null) {
+            BookMark selBookMark = listViewBookMark.getSelectionModel().getSelectedItem();
+            if (selBookMark == null)
+                return;
+            bGotoBMarkPressed = true;
+            playerController.setPlayAfterBookMark(selBookMark);
+        }
     }
+
+    public boolean getGotoBMarkPressed() { return bGotoBMarkPressed; }
 
     @FXML
     public void pressedButtonEditBookmark()
     {
         System.out.println("pressedButtonEditBookmark");
+        textFieldDescription.setEditable(true);
+
+        /*
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(
                     EditBookMarkController.class.getResource("javafxplayerbookmark.fxml"));
@@ -158,12 +245,13 @@ public class BookMarkController {
         }catch (IOException ioe){
             ioe.printStackTrace();
         }
+         */
     }
 
     @FXML
-    public void pressedButtonDeletetBookmark()
+    protected void pressedButtonDeleteBookmark()
     {
-        System.out.println("pressedButtonDeletetBookmark");
+        System.out.println("pressedButtonDeleteBookmark");
         BookMarkCollection col = listViewCollections.getSelectionModel().getSelectedItem();
         if (col == null)
             return;
@@ -171,12 +259,27 @@ public class BookMarkController {
         if (bmks == null || bmks.length == 0)
         {
             bookMarkCollections.remove(col);
+            listViewCollections.getItems().remove(col);
+            if (bookMarkCollections.size() == 0)
+            {
+                buttonEditBookmark.setDisable(true);
+                buttonDeleteBookmark.setDisable(true);
+                buttonGotoBookmark.setDisable(true);
+            }
+           // listViewCollections.setItems(bookMarkCollections);
             return;
         }
         BookMark selBookMark = listViewBookMark.getSelectionModel().getSelectedItem();
         if (selBookMark == null)
             return;
-        listViewCollections.getItems().remove(selBookMark);
+
+        listViewBookMark.getItems().remove(selBookMark);
+        int size = listViewBookMark.getItems().size();
+        BookMark [] array = new BookMark[size];
+        array = listViewBookMark.getItems().toArray(array);
+        col.setBookMarks(array);
+        if (col.getBookMarks().length == 0)
+            bookMarkCollections.remove(col);
     }
 
     @FXML
@@ -193,7 +296,7 @@ public class BookMarkController {
         BookMarkCollection.BOOKMARK_TYPE ret = null;
         if (newBookMark == null)
             return null;
-        String strPlayFile = newBookMark.getPlayfilepath();
+        String strPlayFile = newBookMark.getPlayFilePath();
         if (strPlayFile != null) {
             File fPlay = new File(strPlayFile);
             if (!fPlay.exists())

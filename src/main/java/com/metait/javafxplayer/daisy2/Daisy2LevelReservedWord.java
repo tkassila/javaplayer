@@ -3,10 +3,10 @@ package com.metait.javafxplayer.daisy2;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Daisy2LevelReserevdWord {
+public class Daisy2LevelReservedWord {
     private final String idWord;
     private List<SmilData_Par> smilData_pars = new ArrayList<>();
-    public Daisy2LevelReserevdWord(String p_idWord)
+    public Daisy2LevelReservedWord(String p_idWord)
     {
         idWord = p_idWord;
     }

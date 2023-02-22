@@ -58,8 +58,17 @@ public class BookMarkCollection
     }
 
     public String toString() {
-        return "bookmark strName=" +strName +" strPlayFilePath=" + strPlayFilePath +"\n"
-                +" strSelectedDirPath=" + strSelectedDirPath +"\n";
+     /*   return "bookmark strName=" +strName +" strPlayFilePath=" + strPlayFilePath +"\n"
+                +" strSelectedDirPath=" + strSelectedDirPath +"\n"; */
+          return strName +" " +type.toString() +" " +getNewSelectedDirPath();
+    }
+
+    private String getNewSelectedDirPath()
+    {
+        String ret = strSelectedDirPath;
+        if (strName.startsWith(ret))
+            ret = "";
+        return ret;
     }
 
     public BookMark[] getBookMarks() {

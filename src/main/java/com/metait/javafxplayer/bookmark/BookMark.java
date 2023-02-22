@@ -1,6 +1,8 @@
 package com.metait.javafxplayer.bookmark;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class BookMark {
@@ -10,6 +12,7 @@ public class BookMark {
     public static final String cnstBookMark_playdirindex = "playdirindex";
     public static final String cnstBookMark_position = "position";
     public static final String cnstBookMark_type = "type";
+    public static final String cnstBookMark_description = "description";
 
     private String strName = "";
     private String strPlayFilePath = "";
@@ -19,11 +22,24 @@ public class BookMark {
     private String strDaisyBookIndexPath = "";
     private String strIndArrDirFiles = "";
 
+    public String getStrDescription() {
+        return strDescription;
+    }
+
+    public void setStrDescription(String strDescription) {
+        this.strDescription = strDescription;
+    }
+
+    private String strDescription = "";
+
     private String strType = "";
     private File fAudioFile = null;
     private File daisyFile = null;
     private File fDirFile = null;
 
+    public BookMark() {
+        bookMarkDate = Calendar.getInstance().getTime();
+    }
     public String getName() {
         return strName;
     }
@@ -32,19 +48,19 @@ public class BookMark {
         this.strName = strName;
     }
 
-    public String getPlayfilepath() {
+    public String getPlayFilePath() {
         return strPlayFilePath;
     }
 
-    public void setPlayfilepath(String strPlayFilePath) {
+    public void setPlayFilePath(String strPlayFilePath) {
         this.strPlayFilePath = strPlayFilePath;
     }
 
-    public String getDirpath() {
+    public String getDirPath() {
         return strSelectedDirPath;
     }
 
-    public void setDirpath(String strDirPath) {
+    public void setDirPath(String strDirPath) {
         this.strSelectedDirPath = strDirPath;
     }
     public String getType() {
@@ -79,28 +95,38 @@ public class BookMark {
     }
 
     public String toString() {
-        return "bookmark strName=" +strName +" strPlayFilePath=" + strPlayFilePath +"\n"
+     /*        return "bookmark strName=" +strName +" strPlayFilePath=" + strPlayFilePath +"\n"
                 +" strSelectedDirPath=" + strSelectedDirPath +"\n"
                 +" strDaisyBookIndexPath=" +strDaisyBookIndexPath +"\n"
                 +" strIndArrDirFiles=" +strIndArrDirFiles +"\n"
                 +" dBookMarkPosition=" +dBookMarkPosition +"\n"
                 +" dBookMarkType=" +strType +"\n"
                 +" bookMarkDate=" +bookMarkDate;
+      */
+        return strName +" " +getDateString() +" " +strDescription +" " +dBookMarkPosition;
     }
 
-    public String getDaisybookindexpath() {
+    private String getDateString()
+    {
+        // DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        String strDate= formatter.format(bookMarkDate);
+        return strDate;
+    }
+
+    public String getDaisyBookIndexPath() {
         return strDaisyBookIndexPath;
     }
 
-    public void setDaisybookindexpath(String strDaisyBookIndexPath) {
+    public void setDaisyBookIndexPath(String strDaisyBookIndexPath) {
         this.strDaisyBookIndexPath = strDaisyBookIndexPath;
     }
 
-    public String getIndarrdirfiles() {
+    public String getIndArrDirFiles() {
         return strIndArrDirFiles;
     }
 
-    public void setIndarrdirfiles(String strIndArrDirFiles) {
+    public void setIndArrDirFiles(String strIndArrDirFiles) {
         this.strIndArrDirFiles = strIndArrDirFiles;
     }
 }

@@ -4,8 +4,11 @@ import com.metait.javafxplayer.HyperLinkRedirectListener;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TreeView;
+import javafx.scene.Cursor;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -20,7 +23,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.events.EventTarget;
-import javafx.scene.control.TreeItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 // import org.w3c.dom.html.HTMLAnchorElement;
@@ -54,6 +56,10 @@ public class HelpController {
     private TreeView<TreeItemString> treeView;
     @FXML
     private Button buttonTreeView;
+    @FXML
+    private SplitPane splitPane;
+    @FXML
+    private CheckBox checkBoxScreenReader;
 
     private boolean bLoaded = false;
     private String execJs = "";
@@ -73,10 +79,56 @@ public class HelpController {
     public boolean getLoadAddListener() {
         return loadAddListener;
     }
+    private TextArea textArea = new TextArea();
+    // private ScrollPane scrollPane = new ScrollPane(textArea);
+    private String strRawHelp = "";
+    private double indLastSelectedTextArea = -1;
+    private int iSelectAreaStart = -1;
 
     @FXML
     public void initialize() {
 
+      //  HBox.setHgrow(scrollPane, Priority.ALWAYS);
+
+        textArea.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER)
+                Platform.runLater(new Runnable() {
+                public void run() {
+                    // webViewHelp.requestFocus();
+                    textArea.setText(strRawHelp);
+                    splitPane.getItems().get(0).requestFocus();
+                }
+            });
+            e.consume();
+        });
+
+        textArea.focusedProperty().addListener(new ChangeListener<Boolean>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue)
+            {
+                if (newPropertyValue)
+                {
+                  //  System.out.println("Textfield on focus");
+                    if (indLastSelectedTextArea > -1)
+                        Platform.runLater(new Runnable() {
+                            public void run() {
+                                // webViewHelp.requestFocus();
+                              //  textArea.setScrollTop(getScrollTopValueFrom(indLastSelectedTextArea, textArea.getScrollTop());
+                               // textArea.sc
+                            }
+                        });
+                }
+                /*
+                else
+                {
+                    System.out.println("Textfield out focus");
+                }
+                 */
+            }
+        });
+
+        // textArea.setEditable(false);
         Node rootIcon = null;
         TreeItemString root = new TreeItemString("Index", rootIcon);
         rootItem = new TreeItem<TreeItemString> (root);
@@ -98,6 +150,10 @@ public class HelpController {
         webEngine.getLoadWorker().stateProperty().addListener(linkRedirectListener);
 
         strHelp = getHelpHtml("help.html");
+        strRawHelp = getRawTextFromHelpString();
+        textArea.setText(strRawHelp);
+        textArea.setAccessibleText(strRawHelp);
+
         // webEngine.load(strHelp);
         webEngine.loadContent(strHelp);
         treeView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<TreeItemString>>() {
@@ -110,6 +166,71 @@ public class HelpController {
         });
         pressedButtonTreeView();
      //   System.out.println("handleLinkClick end => bLoaded=" +bLoaded);
+        treeView.setOnKeyPressed(e -> {
+            TreeItem<TreeItemString> selected = treeView.getSelectionModel().getSelectedItem();
+            if (selected != null && e.getCode() == KeyCode.ENTER) {
+                Platform.runLater(new Runnable() {
+                    public void run() {
+                        // webViewHelp.requestFocus();
+                        if (checkBoxScreenReader.isSelected()) {
+                            IndexRange range = textArea.getSelection();
+                            if (range.getLength()>0) {
+                                textArea.deselect();
+                                textArea.positionCaret(iSelectAreaStart +1);
+                                // textArea.selectRange(range.getStart() +1, range.getStart()+1);
+                            }
+                        }
+                        splitPane.getItems().get(1).requestFocus();
+                    }
+                });
+            }
+            e.consume();
+        });
+    }
+
+    private String getRawTextFromHelpString()
+    {
+        String tmp = strHelp;
+        int intBody = tmp.indexOf("<body");
+        if (intBody > -1)
+        {
+            tmp = tmp.substring(intBody);
+        }
+        tmp = tmp.replaceAll("<li\\s.*?>", "-- ");
+        tmp = tmp.replaceAll("<li>", "-- ");
+        tmp = tmp.replaceAll("<h[1-9]>", "\n");
+        tmp = tmp.replaceAll("</h[1-9]>", "\n");
+        // tmp = tmp.replaceAll("<b\\s.*?>", "*");
+//        tmp = tmp.replaceAll("</b>", "\\*");
+//        tmp = tmp.replaceAll("<b>", "\\*");
+        tmp = tmp.replaceAll("<\\!--\n*.*?\n*-->|<.*?>", "");
+        return tmp;
+    }
+    @FXML
+    protected void preassedCheckBoxScreenReader()
+    {
+        System.out.println("preassedCheckBoxScreenReader");
+        if (checkBoxScreenReader.isSelected()) {
+            Object objComp = splitPane.getItems().get(1);
+            try
+            {
+//                String html = (String) webViewHelp.getEngine().executeScript("document.documentElement.outerHTML");
+                // Object objBody = webViewHelp.getEngine().getDocument().getElementsByTagName("BODY");
+                splitPane.getItems().remove(1);
+                splitPane.getItems().add(1, textArea);
+                splitPane.setDividerPositions(0.3);
+            }
+            catch(Exception ex)
+            {
+            }
+            System.out.println("objComp=" +objComp.getClass().toString());
+        }
+        else
+        {
+            splitPane.getItems().remove(1);
+            splitPane.getItems().add(1, webViewHelp);
+            splitPane.setDividerPositions(0.3);
+        }
     }
 
     private void treeItemChanded(TreeItem<TreeItemString> oldValue, TreeItem<TreeItemString> newValue)
@@ -128,6 +249,13 @@ public class HelpController {
             if (idNode == null)
                 return;
             String id = idNode.getNodeValue();
+            if (checkBoxScreenReader.isSelected())
+            {
+                String text = tis.getVisaulString();
+                scrollIntoTextArea(id, text);
+                return;
+            }
+
             // this works all ways: next two staetments are helping clean earlier selections
             WebEngine webEngine = webViewHelp.getEngine();
             if (linkRedirectListener != null) {
@@ -139,6 +267,46 @@ public class HelpController {
 
             if (id != null)
                 scrollInto(id);
+        }
+    }
+
+    private void scrollIntoTextArea(String id, String text)
+    {
+        if (text == null || text.trim().length()==0 || strRawHelp == null
+                || strRawHelp.trim().length()==0)
+            return;
+        int ind = strRawHelp.indexOf(text);
+        indLastSelectedTextArea = ind;
+        if (ind > -1)
+        {
+            double dInt = ind;
+            Platform.runLater(new Runnable() {
+                public void run() {
+                    // webViewHelp.requestFocus();
+                    textArea.setText(strRawHelp);
+                    int caretPosition = textArea.getCaretPosition();
+                    int lineBreak1 = strRawHelp.lastIndexOf('\n', ind);
+                    iSelectAreaStart = lineBreak1;
+                    int lineBreak2 = strRawHelp.indexOf('\n', ind +1);
+                    if (lineBreak2 < 0) {
+                        // if no more line breaks are found, select to end of text
+                        lineBreak2 = strRawHelp.length();
+                    }
+                    textArea.deselect();
+                    textArea.positionCaret(iSelectAreaStart +1);
+                    textArea.selectRange(lineBreak1, lineBreak2);
+                //   scrollPane.set
+                    int caretPos = textArea.getCaretPosition();
+                    Cursor cursor = textArea.getCursor();
+                    if (cursor != null)
+                        System.out.println("cursor=" +cursor);
+                    System.out.println("iSelectAreaStart=" +iSelectAreaStart);
+                    System.out.println("caretPos=" +caretPos);
+                    double left = textArea.getScrollLeft();
+                    // textArea.setScrollTop(dInt);
+               //     textArea.requestFocus();
+                }
+            });
         }
     }
 

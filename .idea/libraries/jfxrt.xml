@@ -1,8 +1,6 @@
 <component name="libraryTable">
   <library name="jfxrt">
-    <CLASSES>
-      <root url="jar://$project_jdk_name$/jre/lib/ext/jfxrt.jar!/" />
-    </CLASSES>
+    <CLASSES />
     <JAVADOC />
     <SOURCES />
   </library>

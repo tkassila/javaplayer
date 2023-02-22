@@ -133,9 +133,19 @@ public class MediaControlPane extends BorderPane {
         mediaView.setAccessibleHelp("Web control");
         mediaView.setAccessibleRole(AccessibleRole.NODE);
 
-        prev10sButton.setAccessibleHelp("previous 10 sec");
-        next10sButton.setAccessibleHelp("next 10 sec");
-        playButton.setAccessibleHelp("play or pause");
+        playButton.setAccessibleRole(AccessibleRole.BUTTON);
+        prev10sButton.setAccessibleRole(AccessibleRole.BUTTON);
+        next10sButton.setAccessibleRole(AccessibleRole.BUTTON);
+        centerLabel.setAccessibleRole(AccessibleRole.TEXT);
+
+        prev10sButton.setAccessibleHelp("previous 10 sec button");
+        prev10sButton.setAccessibleHelp("previous 10 sec button");
+        next10sButton.setAccessibleRoleDescription(prev10sButton.getAccessibleHelp());
+        next10sButton.setAccessibleHelp("next 10 sec button");
+        next10sButton.setAccessibleRoleDescription(next10sButton.getAccessibleHelp());
+
+        playButton.setAccessibleHelp("play or pause button");
+        playButton.setAccessibleRoleDescription(playButton.getAccessibleHelp());
 
         // prev10sButton.setAccessibleRole(AccessibleRole.NODE);
 
@@ -282,10 +292,14 @@ public class MediaControlPane extends BorderPane {
 
         // Add Time label
         Label timeLabel = new Label("Time: ");
+        timeLabel.setFocusTraversable(true);
+        timeLabel.setLabelFor(timeSlider);
+        timeLabel.setAccessibleRole(AccessibleRole.TEXT);
         mediaBar.getChildren().add(timeLabel);
 
         // Add time slider
         timeSlider = new Slider();
+        timeLabel.setLabelFor(timeSlider);
         timeSlider.setAccessibleHelp("audio time slider");
 
         HBox.setHgrow(timeSlider, Priority.ALWAYS);
@@ -306,14 +320,17 @@ public class MediaControlPane extends BorderPane {
         playTime.setAccessibleRole(AccessibleRole.TEXT);
         playTime.setFocusTraversable(true);
         playTime.setAccessibleHelp("play time value");
+        timeLabel.setLabelFor(playTime);
         playTime.setPrefWidth(130);
         playTime.setMinWidth(50);
         mediaBar.getChildren().add(playTime);
 
         // mediaBar.getChildren().add(labelCounter);
         // Add the volume label
-        Label volumeLabel = new Label("Vol: ");
+        Label volumeLabel = new Label("Volume: ");
         volumeLabel.setFocusTraversable(true);
+        volumeLabel.setLabelFor(volumeSlider);
+
         mediaBar.getChildren().add(volumeLabel);
 
         // Add Volume slider
