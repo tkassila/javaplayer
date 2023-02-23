@@ -44,6 +44,10 @@ public class BookMarkController {
 
     private boolean bDescriptionChanged = false;
     private boolean bGotoBMarkPressed = false;
+
+    enum SELECTED_LIST_CONTROL { COLLECTION_LIST, BOOKMARK_LIST };
+    private SELECTED_LIST_CONTROL selectedListType = SELECTED_LIST_CONTROL.BOOKMARK_LIST;
+
     // private List<BookMarkCollection> bookMarkCollections = new ArrayList<BookMarkCollection>();
     private ObservableList<BookMarkCollection> bookMarkCollections = FXCollections.observableArrayList();
     public ObservableList<BookMarkCollection> getBookMarkCollections() { return bookMarkCollections; }
@@ -99,7 +103,7 @@ public class BookMarkController {
                                         break;
                                 }
                                  */
-                                setText(strType +" " +t.getName());
+                                setText(strType +" " +t.getStrDescription() +" " +t.getName());
                             }
                         }
                     };
@@ -119,19 +123,39 @@ public class BookMarkController {
                 //   System.out.println("Selected item: " + newValue);
                 if (oldValue != null && !oldValue.equals(newValue) ) {
                     bDescriptionChanged = true;
-                    BookMark bm = listViewBookMark.getSelectionModel().getSelectedItem();
-                    if (bm != null) {
-                        bm.setStrDescription(newValue);
-                        listViewBookMark.refresh();
+                    if (selectedListType == SELECTED_LIST_CONTROL.BOOKMARK_LIST) {
+                        BookMark bm = listViewBookMark.getSelectionModel().getSelectedItem();
+                        if (bm != null) {
+                            bm.setStrDescription(newValue);
+                            listViewBookMark.refresh();
+                        }
+                    }
+                    else
+                    {
+                        BookMarkCollection bc = listViewCollections.getSelectionModel().getSelectedItem();
+                        if (bc == null)
+                            return;
+                        bc.setStrDescription(newValue);
+                        listViewCollections.refresh();
                     }
                 }
                 else
                 if (newValue != null && !newValue.equals(oldValue) ) {
                     bDescriptionChanged = true;
-                    BookMark bm = listViewBookMark.getSelectionModel().getSelectedItem();
-                    if (bm != null) {
-                        bm.setStrDescription(newValue);
-                        listViewBookMark.refresh();
+                    if (selectedListType == SELECTED_LIST_CONTROL.BOOKMARK_LIST) {
+                        BookMark bm = listViewBookMark.getSelectionModel().getSelectedItem();
+                        if (bm != null) {
+                            bm.setStrDescription(newValue);
+                            listViewBookMark.refresh();
+                        }
+                    }
+                    else
+                    {
+                        BookMarkCollection bc = listViewCollections.getSelectionModel().getSelectedItem();
+                        if (bc == null)
+                            return;
+                        bc.setStrDescription(newValue);
+                        listViewCollections.refresh();
                     }
                 }
             }
@@ -150,10 +174,11 @@ public class BookMarkController {
                             buttonGotoBookmark.setDisable(true);
                             return;
                         }
+                        selectedListType = SELECTED_LIST_CONTROL.BOOKMARK_LIST;
+                        textFieldDescription.setText(newValue.getStrDescription());
                         buttonEditBookmark.setDisable(false);
                         buttonDeleteBookmark.setDisable(false);
                         buttonGotoBookmark.setDisable(false);
-                        textFieldDescription.setText(newValue.getStrDescription());
                     }
                 });
 
@@ -166,6 +191,8 @@ public class BookMarkController {
                      //   System.out.println("Selected item: " + newValue);
                         if (newValue == null)
                             return;
+                        selectedListType = SELECTED_LIST_CONTROL.COLLECTION_LIST;
+                        textFieldDescription.setText(newValue.getStrDescription());
                         BookMark [] bookMarks = newValue.getBookMarks();
                         listViewBookMark.getItems().clear();
                         if (bookMarks != null && bookMarks.length > 0)

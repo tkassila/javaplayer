@@ -21,6 +21,17 @@ public class BookMarkCollection
     private String strName = "";
     private String strPlayFilePath = "";
     private String strSelectedDirPath = "";
+    private String strDescription = "";
+
+    public String getStrDescription() {
+        return strDescription;
+    }
+
+    public void setStrDescription(String strDescription) {
+        this.strDescription = strDescription;
+        if (this.strDescription == null || this.strDescription.equals("null"))
+            this.strDescription = "";
+    }
 
     private File fFile = null;
     private File fDirFile = null;
