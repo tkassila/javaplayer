@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -105,19 +106,19 @@
                      <Insets bottom="5.0" top="5.0" />
                   </padding>
                </HBox>
-               <HBox prefHeight="40.0" prefWidth="517.0" spacing="5.0">
+               <HBox prefHeight="40.0" prefWidth="577.0" spacing="5.0">
                   <children>
-                     <Button fx:id="buttonUpperLevel" accessibleHelp="play previous audio link from daisy book" accessibleText="play previous audio link from daisy book" onAction="#pressedButtonUpperLevel" prefHeight="30.0" prefWidth="261.0" style="-fx-font-weight: bold;" text="Select upper one from index levels" />
-                     <Button fx:id="buttonLowerLevel" accessibleHelp="play next audio link from daisy book" accessibleText="play next audio link from daisy book" onAction="#pressedButtonLowerLevel" prefHeight="30.0" prefWidth="253.0" style="-fx-font-weight: bold;" text="Select lower one from index levels" />
+                     <Button fx:id="buttonUpperLevel" accessibleHelp="play previous audio link from daisy book" accessibleText="play previous audio link from daisy book" onAction="#pressedButtonUpperLevel" prefHeight="30.0" prefWidth="300.0" style="-fx-font-weight: bold;" text="Select upper one from index levels" />
+                     <Button fx:id="buttonLowerLevel" accessibleHelp="play next audio link from daisy book" accessibleText="play next audio link from daisy book" onAction="#pressedButtonLowerLevel" prefHeight="30.0" prefWidth="293.0" style="-fx-font-weight: bold;" text="Select lower one from index levels" />
                   </children>
                   <padding>
                      <Insets bottom="5.0" top="5.0" />
                   </padding>
                </HBox>
-               <HBox layoutX="531.0" layoutY="10.0" prefHeight="40.0" prefWidth="459.0" spacing="5.0">
+               <HBox layoutX="531.0" layoutY="10.0" prefHeight="40.0" prefWidth="539.0" spacing="5.0">
                   <children>
-                     <Button fx:id="buttonPrevLevelLink" accessibleHelp="play previous audio link from daisy book" accessibleText="play previous audio link from daisy book" onAction="#pressedButtonPrevLevelLink" prefHeight="30.0" prefWidth="241.0" style="-fx-font-weight: bold;" text="Previous index in selected level" />
-                     <Button fx:id="buttonNextLevelLink" accessibleHelp="play next audio link from daisy book" accessibleText="play next audio link from daisy book" onAction="#pressedButtonNextLevelLink" prefHeight="30.0" prefWidth="211.0" style="-fx-font-weight: bold;" text="Next index in selected level" />
+                     <Button fx:id="buttonPrevLevelLink" accessibleHelp="play previous audio link from daisy book" accessibleText="play previous audio link from daisy book" onAction="#pressedButtonPrevLevelLink" prefHeight="30.0" prefWidth="268.0" style="-fx-font-weight: bold;" text="Previous index in selected level" />
+                     <Button fx:id="buttonNextLevelLink" accessibleHelp="play next audio link from daisy book" accessibleText="play next audio link from daisy book" onAction="#pressedButtonNextLevelLink" prefHeight="30.0" prefWidth="279.0" style="-fx-font-weight: bold;" text="Next index in selected level" />
                   </children>
                   <padding>
                      <Insets bottom="5.0" top="5.0" />
@@ -153,6 +154,8 @@
                      <Insets />
                   </FlowPane.margin>
                </HBox>
+               <Label text="Language:" />
+               <ComboBox fx:id="comboBoxLanguage" prefHeight="30.0" prefWidth="165.0" />
             </children>
          </FlowPane>
          <HBox prefHeight="29.0" prefWidth="819.0" spacing="5.0">

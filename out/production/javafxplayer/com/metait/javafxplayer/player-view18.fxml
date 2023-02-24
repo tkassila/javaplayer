@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -130,19 +131,19 @@
                     <Insets left="5.0" right="5.0" top="5.0" />
                 </VBox.margin>
                 <children>
-                    <RadioButton fx:id="radioButtonNoTTS" accessibleHelp="%RadioButton22_accessibleHelp" mnemonicParsing="false" prefHeight="20.0" prefWidth="342.0" style="-fx-font-weight: bold;" text="%RadioButton22_text">
+                    <RadioButton fx:id="radioButtonNoTTS" accessibleHelp="%RadioButton22_accessibleHelp" mnemonicParsing="false" prefHeight="20.0" prefWidth="377.0" style="-fx-font-weight: bold;" text="%RadioButton22_text">
                         <toggleGroup>
                             <ToggleGroup fx:id="tts" />
                         </toggleGroup>
                     </RadioButton>
-                    <RadioButton fx:id="radioButtonOwnTTS" accessibleHelp="%RadioButton23_accessibleHelp" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="342.0" style="-fx-font-weight: bold;" text="%RadioButton23_text" toggleGroup="$tts" />
+                    <RadioButton fx:id="radioButtonOwnTTS" accessibleHelp="%RadioButton23_accessibleHelp" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="20.0" prefWidth="381.0" style="-fx-font-weight: bold;" text="%RadioButton23_text" toggleGroup="$tts" />
                     <RadioButton fx:id="radioButtonFreeTts" accessibleHelp="%RadioButton24_accessibleHelp" mnemonicParsing="false" prefHeight="20.0" prefWidth="340.0" style="-fx-font-weight: bold;" text="%RadioButton24_text" toggleGroup="$tts" />
                     <RadioButton fx:id="radioButtonESpeak" accessibleHelp="%RadioButton25_accessibleHelp" mnemonicParsing="false" prefHeight="20.0" prefWidth="320.0" style="-fx-font-weight: bold;" text="%RadioButton25_text" toggleGroup="$tts" />
                     <Label prefHeight="17.0" prefWidth="17.0" />
                     <Button fx:id="buttonHelp" accessibleHelp="%Button26_accessibleHelp" mnemonicParsing="false" onAction="#pressedButtonHelp" prefHeight="30.0" prefWidth="198.0" style="-fx-font-weight: bold;" text="%Button26_text" />
                     <HBox maxWidth="1.7976931348623157E308" prefHeight="40.0" prefWidth="819.0" spacing="5.0">
                         <children>
-                            <Button fx:id="buttonNewBookMark" mnemonicParsing="false" onAction="#pressedButtonNewBookMark" prefHeight="30.0" prefWidth="198.0" style="-fx-font-weight: bold;" text="%Button27_text" />
+                            <Button fx:id="buttonNewBookMark" mnemonicParsing="false" onAction="#pressedButtonNewBookMark" prefHeight="30.0" prefWidth="227.0" style="-fx-font-weight: bold;" text="%Button27_text" />
                             <Button fx:id="buttonBookMarks" mnemonicParsing="false" onAction="#pressedButtonBookMarks" prefHeight="30.0" prefWidth="218.0" style="-fx-font-weight: bold;" text="%Button28_text" />
                             <Label fx:id="labelLinkMsg" prefHeight="28.0" prefWidth="552.0" />
                         </children>
@@ -153,6 +154,8 @@
                             <Insets />
                         </FlowPane.margin>
                     </HBox>
+               <Label text="%Label5_text" />
+               <ComboBox fx:id="comboBoxLanguage" prefHeight="30.0" prefWidth="165.0" />
                 </children>
             </FlowPane>
             <HBox prefHeight="29.0" prefWidth="819.0" spacing="5.0">

@@ -145,10 +145,13 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private Label labelLinkMsg;
     @FXML
     private RadioButton radioButtonOwnTTS;
+    @FXML
+    private ComboBox<String> comboBoxLanguage;
 
     private boolean isFocusNotInWebView = true;
     private Stage bookMarkStage = null;
 
+    private PlayerApplication m_application = null;
     private File filePlay;
     enum PAR_LEVEL_DIRECTION { UPWARD_PAR_LEVEL_DIRECTION, DOWNWARD_PAR_LEVEL_DIRECTION  };
     private PAR_LEVEL_DIRECTION par_level_direction = PAR_LEVEL_DIRECTION.UPWARD_PAR_LEVEL_DIRECTION;
@@ -162,6 +165,18 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private File fChooser = null;
     private FileChooser fileChooser = new FileChooser();
     private Stage primaryStage;
+
+    private String strVolume_UI = "Volume";
+    private String strTime_UI = "Time";
+    private String str_mediapane_1 = "Media meta information";
+    private String str_mediapane_2 = "Web control";
+    private String str_mediapane_3 = "previous 10 sec button";
+    private String str_mediapane_4 = "next 10 sec button";
+    private String str_mediapane_5 = "play or pause button";
+    private String str_mediapane_6 = "audio time slider";
+    private String str_mediapane_7 = "play time value";
+    private String str_mediapane_8 = "volume slider";
+    private ResourceBundle m_bundle = null;
     private MediaControlPane mediaControlPane = null;
     private final String [] arrFileExtenstions = new String[]
             {".mp3", ".html",".htm", ".wav",".mp4",".aiff", ".aif", ".aifc", ".m4a", ".m4b", ".m4p", ".m4r", ".m4v", ".3gp",
@@ -188,14 +203,15 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private List<BookMarkCollection> bookMarkCollections = null;
     private static String java_user_home = System.getProperty("user.home");
     public static final String cnstUserDirOfApp = ".javaplayerfx";
-    private static final String cnstUserJsonFileOfApp = ".javaplayerfx.json";
+    public static final String cnstUserJsonFileOfApp = ".javaplayerfx.json";
     private static final String cnstNoTTS = "notts";
     private static final String cnstFreeTTS = "freetts";
     private static final String cnstEspeakTTS = "espeaktts";;
     private BookMark autoBookMark = null;
     private File daisyIndexFile = null;
     private double dCurrentPosition = -1.0;
-    private HelpController helpController;
+
+    private HelpController helpController = new HelpController();
     private Stage stageHelp;
     private HashMap<String,Integer> hashMapLevelWords = new HashMap<String,Integer>();
     private HashMap<String,Integer> hashMapLevelHeaderWords = new HashMap<String,Integer>();
@@ -224,6 +240,11 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private static final String cnst_last_lang_properties_file = "last_lang_properties_file=";
     private static File static_properties_file;
     private static File static_properties_file2;
+    private double screen_height = 0.0;
+    private double screen_wight = 0.0;
+    public void setScreenValues(double height, double width){
+        screen_height = height;
+        screen_wight = width;  }
 
     public static Locale getLocale()
     {
@@ -232,7 +253,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
 
     private static final String cnst_last_lang2_properties_file = "last_lang2_properties_file=";
 
-    public static void setLanguageLocale()
+  //  public void setApplication(PlayerApplication app) { this.m_application = app; }
+
+    public static void setLanguageLocale_Old()
     {
         String strUserHome = System.getProperty("user.home");
         if (strUserHome != null && strUserHome.trim().length()>0)
@@ -252,6 +275,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                         +"config.properties");
                 if (!appFile.exists())
                     return;
+
                 try {
                     FileReader myReader = new FileReader(appFile);
                     BufferedReader bufferedReader = new BufferedReader(myReader);
@@ -534,6 +558,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
 
         Gson gson = new Gson();
         PlayerConfig config = new PlayerConfig();
+        config.userSelectedLocale = locale;
         config.userRadiobuttonSelected = strRadioButtonSelected;
         config.autoBookmark = autoBookMark;
         if (bookMarkCollections != null) {
@@ -1172,8 +1197,15 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             if (isPlaying)
                 mediaControlPane.pause();
 
+            boolean bMultiLanguage = PlayerController.bUseMultiLang;
             FXMLLoader fxmlLoader = new FXMLLoader(
                     BookMarkController.class.getResource("javafxplayerbookmark.fxml"));
+            if (bMultiLanguage) { // there are some differences between none i18 fxml file and i18 fxml file!
+           //     locale = PlayerController.getLocale();
+                ResourceBundle bundle = ResourceBundle.getBundle("com/metait/javafxplayer/bookmark/lang", locale);
+                fxmlLoader = new FXMLLoader(BookMarkController.class.getResource("javafxplayerbookmark18.fxml"), bundle);
+            }
+
             dialogController = new BookMarkController();
             dialogController.setPlayerController(this);
             dialogController.setBookMarks(bookMarkCollections);
@@ -1422,15 +1454,29 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             buttonPrevLevelLink.setDisable(true);
             buttonNextLevelLink.setDisable(true);
 
+            boolean bMultiLanguage = PlayerController.bUseMultiLang;
             FXMLLoader fxmlLoader = new FXMLLoader(HelpController.class.getResource("javafxplayerhelp.fxml"));
-            helpController = new HelpController();
+         //   helpController = new HelpController();
             fxmlLoader.setController(helpController);
+            if (bMultiLanguage) { // there are some differences between none i18 fxml file and i18 fxml file!
+             //   locale = PlayerConfig.getLanguageLocale(); // The dff are size of buttons etc.
+            //    PlayerController.locale = locale;
+                ResourceBundle bundle = ResourceBundle.getBundle("com/metait/javafxplayer/help/lang", locale);
+                fxmlLoader = new FXMLLoader(HelpController.class.getResource("javafxplayerhelp18.fxml"), bundle);
+                fxmlLoader.setController(helpController);
+            }
+            labelLevel.setFocusTraversable(true);
             Parent parent = fxmlLoader.load();
 
-            labelLevel.setFocusTraversable(true);
-
-            Scene scene = new Scene(parent, 700, 400);
+            Scene scene = new Scene(parent, screen_wight, screen_height);
             stageHelp = new Stage();
+            helpController.setHelpStage(stageHelp);
+            scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+                @Override
+                public void handle(KeyEvent event) {
+                    helpController.handleKeyEvent(event);
+                }
+            });
             // stageHelp.setIconified(true);
             stageHelp.initModality(Modality.WINDOW_MODAL);
             stageHelp.setScene(scene);
@@ -1469,11 +1515,31 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             if (isPlaying)
                 mediaControlPane.pause();
             helpController.scrollInto("main_header");
-            buttonHelp.setDisable(true);
-            stageHelp.showAndWait();
-            buttonHelp.setDisable(false);
+            openHelpCtrl();
         if (isPlaying)
             mediaControlPane.pauseOrPlay();
+    }
+
+    private void openHelpCtrl()
+    {
+        // buttonHelp.setDisable(true);
+        //stageHelp.showAndWait();
+        Platform.runLater(new Runnable() {
+            public void run() {
+                if (stageHelp.isShowing()) {
+                    // stageHelp.close();
+                    stageHelp.requestFocus();
+                    try {
+                        Thread.sleep(500);
+                        stageHelp.show();
+                    }catch (Exception e){
+                    }
+                }
+                else
+                    stageHelp.show();
+            }
+        });
+        //  buttonHelp.setDisable(false);
     }
 
     private List<BookMarkCollection> getBookMarks()
@@ -1560,6 +1626,11 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 ret = new ArrayList<BookMarkCollection>(arrBms.length);
                 for(BookMarkCollection bmc : arrBms)
                     ret.add(bmc);
+                Locale tmp_locale = config.userSelectedLocale;
+                if (tmp_locale != null) {
+                    locale = tmp_locale;
+                    PlayerController.locale = tmp_locale;
+                }
             }
         }catch (IOException ioe){
             ioe.printStackTrace();
@@ -1580,15 +1651,42 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("About JavaFx Player");
         alert.setHeaderText("About JavaFx Player v 1.0");
-        String s ="This is a javafx player for listening music files, directories or\ndaisy 2 book at the time.";
+        String s ="This is a javafx player for listening music files, directories or daisy 2 book at the time.";
         alert.setContentText(s);
         // ObservableList<ButtonType> buttons = alert.getDialogPane().getButtonTypes();
         alert.show();
     }
 
+    public void setResourceBundle(ResourceBundle bundle)
+    {
+        m_bundle = bundle;
+    }
+
+    private String getResourceBungleString(String def_strToolTip, String key)
+    {
+        String ret = def_strToolTip;
+        String tmp_strToolTip;
+        if (m_bundle != null && !locale.getCountry().equals("en")) {
+            try {
+                tmp_strToolTip = m_bundle.getString(key);
+                if (tmp_strToolTip != null && tmp_strToolTip.trim().length() > 0)
+                    ret = tmp_strToolTip;
+            }catch (Exception e){
+                return ret;
+            }
+        }
+        return ret;
+    }
+
     @FXML
     public void initialize() {
 
+        comboBoxLanguage.getItems().add("English");
+        comboBoxLanguage.getItems().add("Suomi");
+        if (locale.getCountry().equals("FI"))
+            comboBoxLanguage.getSelectionModel().select(1);
+        else
+            comboBoxLanguage.getSelectionModel().select(0);
         /*
         scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F1), menuItemOpenDir::fire);
         scene.getAccelerators().put(new KeyCodeCombination(KeyCode.F1), menuItemOpenFile::fire);
@@ -1612,19 +1710,33 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         buttonBookMarks.setId("buttonBookMarks");
         labelMsg.setId("labelMsg");
 
-        Tooltip tooltip = new Tooltip(
-                "Previous link inside of selected level links");
+        strVolume_UI = getResourceBungleString(strVolume_UI, "mediapane_volume");
+        strTime_UI = getResourceBungleString(strTime_UI, "mediapane_time");
+        str_mediapane_1 = getResourceBungleString(str_mediapane_1, "mediapane_1");
+        str_mediapane_2 = getResourceBungleString(str_mediapane_2, "mediapane_2");
+        str_mediapane_3 = getResourceBungleString(str_mediapane_3, "mediapane_3");
+        str_mediapane_4 = getResourceBungleString(str_mediapane_4, "mediapane_4");
+        str_mediapane_5 = getResourceBungleString(str_mediapane_5, "mediapane_5");
+        str_mediapane_6 = getResourceBungleString(str_mediapane_6, "mediapane_6");
+        str_mediapane_7 = getResourceBungleString(str_mediapane_7, "mediapane_7");
+        str_mediapane_8 = getResourceBungleString(str_mediapane_8, "mediapane_8");
+        String strToolTip = "Previous link inside of selected level links";
+        strToolTip = getResourceBungleString(strToolTip, "tooltip_1");
+        Tooltip tooltip = new Tooltip(strToolTip);
         tooltip.setStyle("-fx-font-weight: bold; -fx-text-fill: yellow; -fx-font-size: 14");
         buttonPrevLevelLink.setTooltip(tooltip);
         buttonPrevLevelLink.setAccessibleHelp(tooltip.getText());
-        tooltip = new Tooltip(
-                "Next link inside of selected level links");
+
+        strToolTip = "Next link inside of selected level links";
+        strToolTip = getResourceBungleString(strToolTip, "tooltip_2");
+        tooltip = new Tooltip(strToolTip);
         tooltip.setStyle("-fx-font-weight: bold; -fx-text-fill: yellow; -fx-font-size: 14");
         buttonNextLevelLink.setTooltip(tooltip);
         buttonNextLevelLink.setAccessibleHelp(tooltip.getText());
 
-        tooltip = new Tooltip(
-                "Previous link in daisy index page");
+        strToolTip = "Previous link in daisy index page";
+        strToolTip = getResourceBungleString(strToolTip, "tooltip_3");
+        tooltip = new Tooltip(strToolTip);
         tooltip.setStyle("-fx-font-weight: bold; -fx-text-fill: yellow; -fx-font-size: 14");
         buttonPrevLink.setTooltip(tooltip);
 
@@ -1655,6 +1767,12 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         bookMarkCollections = getBookMarks();
         labelMsg.setAccessibleRole(AccessibleRole.TEXT);
         labelMsg.setFocusTraversable(true);
+
+        comboBoxLanguage.valueProperty().addListener(new ChangeListener<String>() {
+            @Override public void changed(ObservableValue ov, String t, String t1) {
+                changeUILanguage(t1);
+            }
+        });
 
         radioButtonESpeak.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
@@ -1711,7 +1829,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         buttonPlay.setDisable(true);
         buttonNextTrack.setDisable(true);
         // mp = new MediaPlayer();
-        mediaControlPane = new MediaControlPane(this);
+        mediaControlPane = new MediaControlPane(this, strVolume_UI, strTime_UI, str_mediapane_1,
+                str_mediapane_2, str_mediapane_3, str_mediapane_4, str_mediapane_5, str_mediapane_6,
+                str_mediapane_7, str_mediapane_8);
         // mediaControl.setExtensionFilter(audiofilter);
         mediaScrollPane.setContent(mediaControlPane);
 
@@ -1793,6 +1913,63 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         }
 
         return ret;
+    }
+
+    private void changeUILanguage(String selectedLang)
+    {
+        // kkkkk
+        if (selectedLang == null || selectedLang.trim().length() == 0)
+            return;
+      //  Platform.runLater(new Runnable() {
+      //      public void run() {
+                switch ((selectedLang))
+                {
+                    case "English":
+                        locale = new Locale("en", "EN");
+                        PlayerController.locale = locale;
+                        break;
+                    case "Suomi":
+                        locale = new Locale("fi", "FI");
+                        PlayerController.locale = locale;
+                        break;
+                }
+                try {
+                    // appIsClosing();
+                    appIsClosing();
+                    mediaControlPane.stop();
+                    Alert alert = new Alert(AlertType.INFORMATION);
+                    alert.setTitle("JavaFx Player");
+                    alert.setHeaderText("Changing user interface language by stopping and staring this application again.");
+                    String s ="Start this application again and it will change gui lanugage..";
+                    alert.setContentText(s);
+                    // ObservableList<ButtonType> buttons = alert.getDialogPane().getButtonTypes();
+                    alert.show();
+                    primaryStage.close();
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                         //  primaryStage.close();
+                            try {
+                      //       Thread.sleep(1000);
+                              Stage newStage = m_application.startUIAgain();
+                              Thread.sleep(1000);
+                               newStage.requestFocus();
+                           //     Thread.sleep(1000);
+                            }catch (Exception e2){
+                            }
+                        }
+                    });
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            labelMsg.setText("Error: " +e.getMessage());
+                            labelMsg.requestFocus();
+                        }
+                    });
+                }
+         //   }
+     //   });
+
     }
 
     @FXML
@@ -3723,7 +3900,15 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     }
                 }
                     break;
-
+                /*
+            case C:
+                if (event.isAltDown())
+                {
+                    if (stageHelp.isShowing())
+                        stageHelp.close();
+                }
+                break;
+                */
                // case RIGHT: goEast  = true; break;
                // case SHIFT: running = true; break;
             }
@@ -3738,9 +3923,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             String id = source.getId();
             if (id != null){
                 helpController.scrollInto(id);
-                buttonHelp.setDisable(true);
-                stageHelp.showAndWait();
-                buttonHelp.setDisable(false);
+                openHelpCtrl();
             }
         }
     }
@@ -3755,9 +3938,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             String id = source.getId();
             if (id != null){
                 helpController.scrollInto(id);
-                buttonHelp.setDisable(true);
-                stageHelp.showAndWait();
-                buttonHelp.setDisable(false);
+               // buttonHelp.setDisable(true);
+                openHelpCtrl();
+              //  buttonHelp.setDisable(false);
             }
         }
     }

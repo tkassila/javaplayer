@@ -3,10 +3,12 @@ package com.metait.javafxplayer.help;
 import com.metait.javafxplayer.HyperLinkRedirectListener;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.web.WebEngine;
@@ -79,28 +81,67 @@ public class HelpController {
     public boolean getLoadAddListener() {
         return loadAddListener;
     }
+//    private TextArea textArea = new TextArea();
     private TextArea textArea = new TextArea();
     // private ScrollPane scrollPane = new ScrollPane(textArea);
     private String strRawHelp = "";
     private double indLastSelectedTextArea = -1;
     private int iSelectAreaStart = -1;
 
+    private Stage stageHelp = null;
+    public void setHelpStage(Stage stageHelp) { this.stageHelp = stageHelp; }
+
     @FXML
     public void initialize() {
 
       //  HBox.setHgrow(scrollPane, Priority.ALWAYS);
 
+       //textArea.setEditable(false);
+
+        /*
+        textArea.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue == null)
+                return;
+            textArea.setText(oldValue);
+        });
+         */
+
+        textArea.setOnKeyPressed(new EventHandler<KeyEvent>() {
+                public void handle(final KeyEvent keyEvent) {
+                    keyEvent.consume();
+                    if (keyEvent.getCode() == KeyCode.ENTER) {
+                            Platform.runLater(new Runnable() {
+                                public void run() {
+                                    // webViewHelp.requestFocus();
+                                    textArea.setText(strRawHelp);
+                                    splitPane.getItems().get(0).requestFocus();
+                                    treeView.requestFocus();
+                                }
+                                });
+                    }
+                    else
+                    {
+                       // textArea.setText(strRawHelp);
+                        // handleKeyEvent(keyEvent);
+                    }
+                }
+            });
+        /*
         textArea.setOnKeyPressed(e -> {
+            e.consume();
             if (e.getCode() == KeyCode.ENTER)
                 Platform.runLater(new Runnable() {
                 public void run() {
                     // webViewHelp.requestFocus();
                     textArea.setText(strRawHelp);
                     splitPane.getItems().get(0).requestFocus();
+                    treeView.requestFocus();
                 }
             });
-            e.consume();
+          //  else
+            //    handleKeyEvent(e);
         });
+        */
 
         textArea.focusedProperty().addListener(new ChangeListener<Boolean>()
         {
@@ -167,6 +208,7 @@ public class HelpController {
         pressedButtonTreeView();
      //   System.out.println("handleLinkClick end => bLoaded=" +bLoaded);
         treeView.setOnKeyPressed(e -> {
+            e.consume();
             TreeItem<TreeItemString> selected = treeView.getSelectionModel().getSelectedItem();
             if (selected != null && e.getCode() == KeyCode.ENTER) {
                 Platform.runLater(new Runnable() {
@@ -184,8 +226,12 @@ public class HelpController {
                     }
                 });
             }
-            e.consume();
+           else
+                handleKeyEvent(e);
+            // e.consume();
         });
+
+        checkBoxScreenReader.requestFocus();
     }
 
     private String getRawTextFromHelpString()
@@ -682,7 +728,7 @@ public class HelpController {
                     WebEngine engine = webViewHelp.getEngine();
                     if (engine != null) {
 
-                        if (execJs3 != null) {
+                        if (engine != null && execJs3 != null) {
                             // engine.executeScript(execJs3);
                             engine.executeScript("document.body.style.backgroundColor = 'white';");
                             engine.executeScript(execJs3);
@@ -699,8 +745,10 @@ public class HelpController {
                         }catch (Exception e){
                         }
                          */
-                        engine.executeScript(execJs);
-                        engine.executeScript(execJs2);
+                        if (engine != null && execJs != null)
+                            engine.executeScript(execJs);
+                        if (engine != null && execJs2 != null)
+                            engine.executeScript(execJs2);
                         htmlid = p_htmlid;
                     }
                 }
@@ -774,4 +822,51 @@ public class HelpController {
             expandTreeItem(ti, bValue);
         }
     }
-}
+
+    public void handleKeyEvent(KeyEvent event) {
+        event.consume();
+        KeyCode keyCode = event.getCode();
+        switch (keyCode) {
+            case Q:
+                if (event.isAltDown()) {
+                    stageHelp.close();
+                }
+                break;
+            case I:
+                if (event.isAltDown()) {
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            treeView.requestFocus();
+                        }
+                    });
+                }
+                break;
+            case W:
+                if (event.isAltDown()) {
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            if (checkBoxScreenReader.isSelected())
+                                textArea.requestFocus();
+                            else
+                                webViewHelp.requestFocus();
+                        }
+                    });
+                }
+                break;
+                /*
+                case C:
+                    if (event.isAltDown())
+                    {
+                        if (stageHelp.isShowing())
+                            stageHelp.close();
+                    }
+                    break;
+
+                   // case RIGHT: goEast  = true; break;
+                   // case SHIFT: running = true; break;
+                }
+                     */
+            }
+        }
+
+    }

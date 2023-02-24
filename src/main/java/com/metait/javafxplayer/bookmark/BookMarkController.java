@@ -67,6 +67,47 @@ public class BookMarkController {
 
     public List<BookMarkCollection> getBookMarks() { return bookMarkCollections; }
 
+    private void listBookMarkItemChanged(BookMark newValue) {
+        // Your action here
+        //   System.out.println("Selected item: " + newValue);
+
+        if (newValue == null) {
+            buttonEditBookmark.setDisable(true);
+            buttonDeleteBookmark.setDisable(true);
+            buttonGotoBookmark.setDisable(true);
+            return;
+        }
+        selectedListType = SELECTED_LIST_CONTROL.BOOKMARK_LIST;
+        textFieldDescription.setText(newValue.getStrDescription());
+        buttonEditBookmark.setDisable(false);
+        buttonDeleteBookmark.setDisable(false);
+        buttonGotoBookmark.setDisable(false);
+    }
+
+    private void listViewCollectionItemChanged(BookMarkCollection newValue)
+    {
+        selectedListType = SELECTED_LIST_CONTROL.COLLECTION_LIST;
+        textFieldDescription.setText(newValue.getStrDescription());
+        BookMark [] bookMarks = newValue.getBookMarks();
+        listViewBookMark.getItems().clear();
+        textFieldDescription.setEditable(false);
+        if (bookMarks != null && bookMarks.length > 0)
+        {
+            listViewBookMark.getItems().addAll(bookMarks);
+        }
+        if (bookMarks.length ==0)
+        {
+            buttonEditBookmark.setDisable(true);
+            buttonDeleteBookmark.setDisable(false);
+            buttonGotoBookmark.setDisable(true);
+        }
+        else
+        {
+            buttonEditBookmark.setDisable(false);
+            buttonDeleteBookmark.setDisable(true);
+            buttonGotoBookmark.setDisable(true);
+        }
+    }
     @FXML
     public void initialize() {
         buttonHelpClose.defaultButtonProperty().bind(buttonHelpClose.focusedProperty());
@@ -161,26 +202,38 @@ public class BookMarkController {
             }
         });
 
+        listViewBookMark.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null)
+                return;
+            if (listViewBookMark.isFocused())
+            {
+                BookMark newValue2 =  listViewBookMark.getSelectionModel().getSelectedItem();
+                if (newValue2 == null)
+                    return;
+                // listViewCollectionItemChange(newValue2);
+            }
+        });
+
         listViewBookMark.getSelectionModel().selectedItemProperty().addListener(
                 new ChangeListener<BookMark>() {
                     @Override
                     public void changed(ObservableValue<? extends BookMark> observable,
                                         BookMark oldValue, BookMark newValue) {
-                        // Your action here
-                        //   System.out.println("Selected item: " + newValue);
-                        if (newValue == null) {
-                            buttonEditBookmark.setDisable(true);
-                            buttonDeleteBookmark.setDisable(true);
-                            buttonGotoBookmark.setDisable(true);
-                            return;
-                        }
-                        selectedListType = SELECTED_LIST_CONTROL.BOOKMARK_LIST;
-                        textFieldDescription.setText(newValue.getStrDescription());
-                        buttonEditBookmark.setDisable(false);
-                        buttonDeleteBookmark.setDisable(false);
-                        buttonGotoBookmark.setDisable(false);
+                        listBookMarkItemChanged(newValue);
                     }
                 });
+
+        listViewCollections.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null)
+                return;
+            if (listViewCollections.isFocused())
+            {
+                BookMarkCollection newValue2 =  listViewCollections.getSelectionModel().getSelectedItem();
+                if (newValue2 == null)
+                    return;
+                listViewCollectionItemChanged(newValue2);
+            }
+        });
 
         listViewCollections.getSelectionModel().selectedItemProperty().addListener(
                 new ChangeListener<BookMarkCollection>() {
@@ -191,28 +244,10 @@ public class BookMarkController {
                      //   System.out.println("Selected item: " + newValue);
                         if (newValue == null)
                             return;
-                        selectedListType = SELECTED_LIST_CONTROL.COLLECTION_LIST;
-                        textFieldDescription.setText(newValue.getStrDescription());
-                        BookMark [] bookMarks = newValue.getBookMarks();
-                        listViewBookMark.getItems().clear();
-                        if (bookMarks != null && bookMarks.length > 0)
-                        {
-                            listViewBookMark.getItems().addAll(bookMarks);
-                        }
-                        if (bookMarks.length ==0)
-                        {
-                            buttonEditBookmark.setDisable(true);
-                            buttonDeleteBookmark.setDisable(false);
-                            buttonGotoBookmark.setDisable(true);
-                        }
-                        else
-                        {
-                            buttonEditBookmark.setDisable(true);
-                            buttonDeleteBookmark.setDisable(true);
-                            buttonGotoBookmark.setDisable(true);
-                        }
+                        listViewCollectionItemChanged(newValue);
                     }
         });
+
         listViewCollections.getItems().addAll(bookMarkCollections);
 
             // buttonHelpClose.defaultButtonProperty().bind(buttonHelpClose.focusedProperty());

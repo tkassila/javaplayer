@@ -66,6 +66,16 @@ public class MediaControlPane extends BorderPane {
     private EventHandler next10sButtonEventHandler = null;
     private Label labelClicked = new Label();
 
+    private String strVolume_ui;
+    private String strTime_u;
+    private String strMediaPane_1;
+    private String strMediaPane_2;
+    private String strMediaPane_3;
+    private String strMediaPane_4;
+    private String strMediaPane_5;
+    private String strMediaPane_6;
+    private String strMediaPane_7;
+    private String strMediaPane_8;
     public double getStopAndCurrentTime()
     {
         if (currentTime == null)
@@ -119,18 +129,31 @@ public class MediaControlPane extends BorderPane {
         timeSlider.setDisable(bValue);
     }
 
-    public MediaControlPane(IFileContainer p_parent) {
+    public MediaControlPane(IFileContainer p_parent, String p_volume_ui, String p_strTime_ui,
+                            String p_strMediaPane_1, String p_strMediaPane_2, String p_strMediaPane_3,
+                            String p_strMediaPane_4, String p_strMediaPane_5, String p_strMediaPane_6,
+                            String p_strMediaPane_7, String p_strMediaPane_8) {
 
+        strTime_u = p_strTime_ui;
+        strVolume_ui = p_volume_ui;
+        strMediaPane_1 = p_strMediaPane_1;
+        strMediaPane_2 = p_strMediaPane_2;
+        strMediaPane_3 = p_strMediaPane_3;
+        strMediaPane_4 = p_strMediaPane_4;
+        strMediaPane_5 = p_strMediaPane_5;
+        strMediaPane_6 = p_strMediaPane_6;
+        strMediaPane_7 = p_strMediaPane_7;
+        strMediaPane_8 = p_strMediaPane_8;
         m_parent = p_parent;
         setStyle("-fx-background-color: #bfc2c7;");
         mediaView = new MediaView();
         Pane mvPane = new Pane() {
         };
         centerLabel.setPadding(new Insets(5, 10, 5, 10));
-        centerLabel.setAccessibleHelp("Media meta information");
+        centerLabel.setAccessibleHelp(strMediaPane_1);
         centerLabel.setAccessibleRole(AccessibleRole.TEXT);
         centerLabel.setFocusTraversable(true);
-        mediaView.setAccessibleHelp("Web control");
+        mediaView.setAccessibleHelp(strMediaPane_2);
         mediaView.setAccessibleRole(AccessibleRole.NODE);
 
         playButton.setAccessibleRole(AccessibleRole.BUTTON);
@@ -138,13 +161,12 @@ public class MediaControlPane extends BorderPane {
         next10sButton.setAccessibleRole(AccessibleRole.BUTTON);
         centerLabel.setAccessibleRole(AccessibleRole.TEXT);
 
-        prev10sButton.setAccessibleHelp("previous 10 sec button");
-        prev10sButton.setAccessibleHelp("previous 10 sec button");
+        prev10sButton.setAccessibleHelp(strMediaPane_3);
         next10sButton.setAccessibleRoleDescription(prev10sButton.getAccessibleHelp());
-        next10sButton.setAccessibleHelp("next 10 sec button");
+        next10sButton.setAccessibleHelp(strMediaPane_4);
         next10sButton.setAccessibleRoleDescription(next10sButton.getAccessibleHelp());
 
-        playButton.setAccessibleHelp("play or pause button");
+        playButton.setAccessibleHelp(strMediaPane_5);
         playButton.setAccessibleRoleDescription(playButton.getAccessibleHelp());
 
         // prev10sButton.setAccessibleRole(AccessibleRole.NODE);
@@ -291,7 +313,7 @@ public class MediaControlPane extends BorderPane {
         mediaBar.getChildren().add(spacer);
 
         // Add Time label
-        Label timeLabel = new Label("Time: ");
+        Label timeLabel = new Label(strTime_u +": ");
         timeLabel.setFocusTraversable(true);
         timeLabel.setLabelFor(timeSlider);
         timeLabel.setAccessibleRole(AccessibleRole.TEXT);
@@ -300,7 +322,7 @@ public class MediaControlPane extends BorderPane {
         // Add time slider
         timeSlider = new Slider();
         timeLabel.setLabelFor(timeSlider);
-        timeSlider.setAccessibleHelp("audio time slider");
+        timeSlider.setAccessibleHelp(strMediaPane_6);
 
         HBox.setHgrow(timeSlider, Priority.ALWAYS);
         timeSlider.setMinWidth(50);
@@ -319,7 +341,7 @@ public class MediaControlPane extends BorderPane {
         playTime = new Label();
         playTime.setAccessibleRole(AccessibleRole.TEXT);
         playTime.setFocusTraversable(true);
-        playTime.setAccessibleHelp("play time value");
+        playTime.setAccessibleHelp(strMediaPane_7);
         timeLabel.setLabelFor(playTime);
         playTime.setPrefWidth(130);
         playTime.setMinWidth(50);
@@ -327,7 +349,7 @@ public class MediaControlPane extends BorderPane {
 
         // mediaBar.getChildren().add(labelCounter);
         // Add the volume label
-        Label volumeLabel = new Label("Volume: ");
+        Label volumeLabel = new Label(strVolume_ui +": ");
         volumeLabel.setFocusTraversable(true);
         volumeLabel.setLabelFor(volumeSlider);
 
@@ -335,7 +357,7 @@ public class MediaControlPane extends BorderPane {
 
         // Add Volume slider
         volumeSlider = new Slider();
-        volumeSlider.setAccessibleHelp("volume slider");
+        volumeSlider.setAccessibleHelp(strMediaPane_8);
         volumeSlider.setPrefWidth(70);
         volumeSlider.setMaxWidth(Region.USE_PREF_SIZE);
         volumeSlider.setMinWidth(30);
@@ -582,7 +604,7 @@ public class MediaControlPane extends BorderPane {
         iIndArrDirFiles = p_iIndArrDirFiles;
         iArrDirFiles = iArraySize;
         stopRequested = false;
-        playButton.setText(">");
+        playButton.setText("   " +">" +"   ");
 
         if (selectedFile == null)
             return;
@@ -751,7 +773,7 @@ public class MediaControlPane extends BorderPane {
                     mp.pause();
                     stopRequested = false;
                 } else {
-                    playButton.setText("||");
+                    playButton.setText("   " +"||" +"   ");
                 }
             }
         });
@@ -759,7 +781,7 @@ public class MediaControlPane extends BorderPane {
         mp.setOnPaused(new Runnable() {
             public void run() {
           //     System.out.println("onPaused");
-                playButton.setText(">");
+                playButton.setText("   " +">" +"   ");
             }
         });
 
@@ -774,7 +796,7 @@ public class MediaControlPane extends BorderPane {
         mp.setOnEndOfMedia(new Runnable() {
             public void run() {
                 if (!repeat) {
-                    playButton.setText(">");
+                    playButton.setText("   " +">" +"  ");
                     stopRequested = true;
                     atEndOfMedia = true;
                     possibleNextTrack();
