@@ -32,7 +32,7 @@ public class MediaControlPane extends BorderPane {
 
     private MediaPlayer mp;
     private MediaView mediaView;
-    private boolean repeat = false;
+    private boolean bRepeat = false;
     private boolean stopRequested = false;
     private boolean atEndOfMedia = false;
     private Duration duration;
@@ -76,6 +76,19 @@ public class MediaControlPane extends BorderPane {
     private String strMediaPane_6;
     private String strMediaPane_7;
     private String strMediaPane_8;
+
+    public int getTimeHop() {
+        return iTimeHop;
+    }
+
+    public void setTimeHop(int iTimeHop) {
+        this.iTimeHop = iTimeHop;
+        prev10sButton.setText("< " +(iTimeHop / 1000) +"s");
+        next10sButton.setText("" +(iTimeHop / 1000) +"s >");
+    }
+
+    private int iTimeHop = 10000;
+
     public double getStopAndCurrentTime()
     {
         if (currentTime == null)
@@ -190,7 +203,7 @@ public class MediaControlPane extends BorderPane {
 
         prev10sButtonEventHandler = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                setBackwardAfterMilliSecs(10000);
+                setBackwardAfterMilliSecs(iTimeHop);
                 /*
                 MediaPlayer.Status status = mp.getStatus();
 
@@ -236,7 +249,7 @@ public class MediaControlPane extends BorderPane {
 
         next10sButtonEventHandler = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-               setForwardAfterMilliSecs(10000);
+               setForwardAfterMilliSecs(iTimeHop);
               /*
                 MediaPlayer.Status status = mp.getStatus();
 
@@ -792,10 +805,10 @@ public class MediaControlPane extends BorderPane {
             }
         });
 
-        mp.setCycleCount(repeat ? MediaPlayer.INDEFINITE : 1);
+        mp.setCycleCount(bRepeat ? MediaPlayer.INDEFINITE : 1);
         mp.setOnEndOfMedia(new Runnable() {
             public void run() {
-                if (!repeat) {
+                if (!bRepeat) {
                     playButton.setText("   " +">" +"  ");
                     stopRequested = true;
                     atEndOfMedia = true;

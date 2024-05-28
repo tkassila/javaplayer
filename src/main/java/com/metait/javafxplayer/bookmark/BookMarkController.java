@@ -119,6 +119,7 @@ public class BookMarkController {
         buttonGotoBookmark.setDisable(true);
         textFieldDescription.setEditable(false);
 
+        /*
         if (bookMarkCollections != null) {
             listViewCollections.setCellFactory(new Callback<ListView<BookMarkCollection>, ListCell<BookMarkCollection>>() {
                 @Override
@@ -126,10 +127,11 @@ public class BookMarkController {
                     ListCell<BookMarkCollection> cell = new ListCell<BookMarkCollection>() {
                         @Override
                         protected void updateItem(BookMarkCollection t, boolean bln) {
-                            super.updateItem(t, bln);
+                            String strType = "";
                             if (t != null) {
-                                String strType = t.getType().toString().replace("_", " ");
-                                /*
+                                super.updateItem(t, bln);
+                                strType = t.getType() == null ? "" : t.getType().toString(); // .replace("_", " ");
+                                /?
                                 BookMarkCollection.BOOKMARK_TYPE type = getBookMarkType(t.getBookMarks());
                                 switch (type)
                                 {
@@ -143,7 +145,7 @@ public class BookMarkController {
                                         strType = "FILE";
                                         break;
                                 }
-                                 */
+                                 ?/
                                 setText(strType +" " +t.getStrDescription() +" " +t.getName());
                             }
                         }
@@ -152,6 +154,7 @@ public class BookMarkController {
                 }
             });
         }
+        */
 
         buttonEditBookmark.setDisable(true);
         buttonDeleteBookmark.setDisable(true);

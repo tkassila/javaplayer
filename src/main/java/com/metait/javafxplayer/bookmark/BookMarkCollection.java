@@ -17,7 +17,7 @@ public class BookMarkCollection
 
     public BOOKMARK_TYPE getType() { return type; }
     private BOOKMARK_TYPE type = null;
-    private BookMark [] bookMarks = null;
+    private BookMark [] bookMarks = new BookMark [0];
     private String strName = "";
     private String strPlayFilePath = "";
     private String strSelectedDirPath = "";
@@ -71,7 +71,7 @@ public class BookMarkCollection
     public String toString() {
      /*   return "bookmark strName=" +strName +" strPlayFilePath=" + strPlayFilePath +"\n"
                 +" strSelectedDirPath=" + strSelectedDirPath +"\n"; */
-          return strName +" " +type.toString() +" " +getNewSelectedDirPath();
+          return strName +" " +(type == null ? "" : String.valueOf(type)) +" " +getNewSelectedDirPath();
     }
 
     private String getNewSelectedDirPath()

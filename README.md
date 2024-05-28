@@ -6,6 +6,16 @@ daisy 2 books. UI of the application has accessible buttons etc,
 which are working with screen readers. many buttons also has 
 keyboard keys to press and control.
 
+### Import notice before a first use:</h1>
+
+<p>In linux, like in Ubuntu Desktop, preinstall with next bash command:</p>
+
+<p>sudo apt install ffmpeg and enter</p>
+
+<p>for this player to function well!</p>
+
+### Usage
+
 When application is started, press some of short keys:
 - alt+f = open audio etc file, 
 - alt+d = open daisy book ncc.html file

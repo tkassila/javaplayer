@@ -5,11 +5,8 @@
       <element id="module-output" name="javafxplayer" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/dom4j/dom4j/2.1.3/dom4j-2.1.3.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-fxml/11.0.2/javafx-fxml-11.0.2-win.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/net/sf/sociaal/freetts/1.2.2/freetts-1.2.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jsapi.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-graphics/11.0.2/javafx-graphics-11.0.2-win.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-media/11.0.2/javafx-media-11.0.2-win.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.9/gson-2.8.9.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-media/11.0.2/javafx-media-11.0.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar" path-in-jar="/" />
@@ -26,9 +23,6 @@
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/jaxen/jaxen/1.2.0/jaxen-1.2.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-fxml/11.0.2/javafx-fxml-11.0.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-graphics/11.0.2/javafx-graphics-11.0.2.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$project_jdk_name$/jre/lib/ext/jfxrt.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-controls/11.0.2/javafx-controls-11.0.2-win.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-base/11.0.2/javafx-base-11.0.2-win.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openjfx/javafx-controls/11.0.2/javafx-controls-11.0.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/codehaus/jackson/jackson-xc/1.9.13/jackson-xc-1.9.13.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jsoup/jsoup/1.14.2/jsoup-1.14.2.jar" path-in-jar="/" />

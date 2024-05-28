@@ -87,6 +87,11 @@ public class HelpController {
     private String strRawHelp = "";
     private double indLastSelectedTextArea = -1;
     private int iSelectAreaStart = -1;
+    private Locale locale;
+    public void setLocale(Locale p_locale)
+    {
+        locale = p_locale;
+    }
 
     private Stage stageHelp = null;
     public void setHelpStage(Stage stageHelp) { this.stageHelp = stageHelp; }
@@ -189,9 +194,11 @@ public class HelpController {
         });
         linkRedirectListener = new HelpLinkRedirectListener(webViewHelp, this);
         webEngine.getLoadWorker().stateProperty().addListener(linkRedirectListener);
-
-        strHelp = getHelpHtml("help.html");
-        strRawHelp = getRawTextFromHelpString();
+        String helpFileName = "help.html";
+        if (locale != null && !locale.getCountry().equals("EN"))
+            helpFileName = "help_" +locale.getCountry().toLowerCase() +".html";
+         strHelp = getHelpHtml(helpFileName);
+                 strRawHelp = getRawTextFromHelpString();
         textArea.setText(strRawHelp);
         textArea.setAccessibleText(strRawHelp);
 

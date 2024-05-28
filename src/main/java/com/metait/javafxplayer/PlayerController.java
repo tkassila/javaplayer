@@ -250,6 +250,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     {
         return locale;
     }
+    final String cnstStringAutomatic = "Automatic play location";
 
     private static final String cnst_last_lang2_properties_file = "last_lang2_properties_file=";
 
@@ -513,7 +514,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     }
 
     private void savePlayPositionAndBookMarks(int iIndArrDirFiles,
-            File selectedDirectory, File playFile, double currenttime,
+            File selectedDirectory, File playFile, double currentTime,
             List<BookMarkCollection> bookMarkCollections,
             String strReaioButtonSelected, File daisyIndexFile)
     {
@@ -529,19 +530,19 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         if (playFile != null) {
             autoBookMark = new BookMark();
           //  autoBookMark.setBookMarkDate(new Date(Calendar.getInstance().getTime()));
-            // autoBookMarkCollection.setBookMarkPosition(currenttime);
+            // autoBookMarkCollection.setBookMarkPosition(currentTime);
             autoBookMark.setPlayFilePath(playFile.getAbsolutePath());
-            autoBookMark.setType(getUserSelectedOpenFileType(user_selected_to_open));
             if (selectedDirectory != null)
                 autoBookMark.setDirPath(selectedDirectory.getAbsolutePath());
             autoBookMark.setName("autobookmark");
-            autoBookMark.setPosition(currenttime / 1000);
+            autoBookMark.setPosition(currentTime / 1000);
             autoBookMark.setIndArrDirFiles("" +iIndArrDirFiles);
             if (daisyIndexFile != null)
                 autoBookMark.setDaisyBookIndexPath(daisyIndexFile.getAbsolutePath());
             // autoBookMarkCollection.setStrIndArrDirFiles(""+iIndArrDirFiles);
         //    strAutoBookMark = getAutoBookMarkString(autoBookMark);
          //   strBookMarks = getUserBookMarkString();
+            autoBookMark.setType(getUserSelectedOpenFileType(user_selected_to_open));
         }
         String strRadioButtonSelected = (strReaioButtonSelected != null && strReaioButtonSelected.trim().length()!=0
                                          ? strReaioButtonSelected : "");
@@ -1178,6 +1179,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 Platform.runLater(new Runnable() {
                     public void run() {
                         bookMarkStage.close();
+                        callPressedButtonNewBookMark(true);
                         loadFile(filePlay, bookMark);
                         updateSplitPaneDividerPosition();
                     }
@@ -1231,8 +1233,12 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 }
             });
             bookMarkStage = stage;
-            stage.showAndWait();
-            buttonBookMarks.setDisable(false);
+            Platform.runLater(new Runnable() {
+                public void run() {
+                    stage.showAndWait();
+                    buttonBookMarks.setDisable(false);
+                }
+            });
         }catch (IOException ioe){
             ioe.printStackTrace();
         }
@@ -1287,23 +1293,122 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 isDaisyNcc = false;
             } else {
                 if (strType != null && strType.trim().length()!= 0) {
-                    if (strType.equals(BookMarkCollection.BOOKMARK_TYPE.AUDIO_FILE.toString()))
+                    if (strType.equals("FILE"))
                         ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_FILE;
-                    else if (strType.equals(BookMarkCollection.BOOKMARK_TYPE.AUDIO_DIR.toString()))
+                    else if (strType.equals("DIR"))
                         ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_DIR;
-                    else if (strType.equals(BookMarkCollection.BOOKMARK_TYPE.DAISY.toString()))
+                    else if (strType.equals("DAISY"))
                         ret = BookMarkCollection.BOOKMARK_TYPE.DAISY;
                 }
-                isDaisyNcc = false;
+                else
+                {
+                    isDaisyNcc = false;
+                    if (strType == null || strType.trim().length() == 0) {
+                        if ((fPlay.getName().endsWith(".html")
+                                || fPlay.getName().endsWith(".html")
+                                || fPlay.getName().endsWith(".htm")))
+                        {
+                            ret = BookMarkCollection.BOOKMARK_TYPE.DAISY;
+                            isDaisyNcc = true;
+                        }
+                        else
+                        {
+                            if (fPlay.isDirectory())
+                                ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_DIR;
+                            else
+                                ret = BookMarkCollection.BOOKMARK_TYPE.AUDIO_FILE;
+                        }
+                    }
+                }
+
             }
         }
         return ret;
     }
 
-    @FXML
-    protected void pressedButtonNewBookMark()
+    private BookMark [] getCorrectedOldBookMarks(BookMark [] oldBookMarks)
     {
-        System.out.println("pressedButtonNewBookMark");
+        BookMark [] ret = oldBookMarks;
+        int iRemoveAutomaticOldBmark = -1;
+        int len = oldBookMarks.length;
+        for (int i = 0; i < len; i++ ) {
+            if (oldBookMarks[i].getName().contains(cnstStringAutomatic)) {
+                iRemoveAutomaticOldBmark = i;
+                break;
+            }
+        }
+        if (iRemoveAutomaticOldBmark == -1)
+            return ret;
+        ret = new BookMark[oldBookMarks.length -1];
+        int j = 0;
+        for (int i = 0; i < len; i++ ) {
+            if (iRemoveAutomaticOldBmark != i) {
+                ret[j++] = oldBookMarks[i];
+            }
+        }
+        iRemoveAutomaticOldBmark = -1;
+        len = ret.length;
+        for (int i = 0; i < len; i++ ) {
+            if (ret[i].getName().contains(cnstStringAutomatic)) {
+                iRemoveAutomaticOldBmark = i;
+                break;
+            }
+        }
+        if (iRemoveAutomaticOldBmark > -1)
+            return getCorrectedOldBookMarks(ret);
+        return ret;
+    }
+
+    private BookMark [] getAutomaticBookMarkAndOldBookMarks(BookMark newBookMark, BookMark [] oldBookMarks)
+    {
+        BookMark [] ret = oldBookMarks;
+        if (newBookMark != null)
+        {
+            newBookMark.setName("0 " +cnstStringAutomatic);
+            if (newBookMark.getType().equals("DAISY"))
+                newBookMark.setName("0 " +cnstStringAutomatic);
+            if (ret == null  || ret.length == 0) {
+                ret = new BookMark[1];
+                ret[0] = newBookMark;
+            }
+            else {
+                int len = oldBookMarks.length;
+                int iRemoveAutomaticOldBmark = -1;
+                int iAddNewBMark = 1;
+                BookMark[] correctedOldBMarks = getCorrectedOldBookMarks(oldBookMarks);
+                //if (correctedOldBMarks.length != oldBookMarks.length)
+                //  iAddNewBMark = 0;
+
+                ret = new BookMark[correctedOldBMarks.length + iAddNewBMark];
+                int j = 0;
+                ret[j++] = newBookMark;
+                len = correctedOldBMarks.length;
+                if (len == 0) {
+                    return ret;
+                }
+
+                for (int i = 0; i < len; i++) {
+                    ret[j++] = correctedOldBMarks[i];
+                }
+            }
+        }
+        return ret;
+    }
+
+    private String getDaisyBookMarkIndexValue(String strName)
+    {
+        if (strName == null || strName.trim().length() == 0)
+            return "";
+        int ind = strName.indexOf(' ');
+        if (ind > -1)
+        {
+            return strName.substring(0, ind).trim();
+        }
+        return strName;
+    }
+
+    private void callPressedButtonNewBookMark(boolean bCreateLastPlayedBookMark)
+    {
         dCurrentPosition = mediaControlPane.getCurrentTime();
         File playFile = mediaControlPane.getPlayFile();
         BookMark newBookMark = new BookMark();
@@ -1329,12 +1434,12 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         {
             newBookCollectionName = playFile.getParentFile().getAbsolutePath();
         }
-       // newBookCollectionName = newBookCollectionName +" " +max +1;
+        // newBookCollectionName = newBookCollectionName +" " +max +1;
         if (selectedDirectory != null)
             newBookMark.setDirPath(selectedDirectory.getAbsolutePath());
         else
-            if (dirChooser != null)
-                newBookMark.setDirPath(dirChooser.getAbsolutePath());
+        if (dirChooser != null)
+            newBookMark.setDirPath(dirChooser.getAbsolutePath());
         newBookMark.setPlayFilePath(m_selectedFile.getAbsolutePath());
         newBookMark.setPosition(dCurrentPosition / 1000);
         if (metadataSmilDataPar != null && metadataSmilDataPar.getStrTitle() != null) {
@@ -1357,14 +1462,17 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             newBookMark.setIndArrDirFiles("" +iIndArrDirFiles);
         BookMarkCollection bc = getBookMarkCollectionOf(newBookCollectionName, newBookMark);
         if (bc == null) {
-        //    BookMarkCollection.BOOKMARK_TYPE bmtype = getBookMarkType(newBookMark);
+            //    BookMarkCollection.BOOKMARK_TYPE bmtype = getBookMarkType(newBookMark);
             bc = new BookMarkCollection(bmType);
             bc.setDirPath(newBookMark.getDirPath());
             bc.setPlayFilePath(newBookMark.getPlayFilePath());
             bc.setName(newBookCollectionName);
             if (bmType != BookMarkCollection.BOOKMARK_TYPE.DAISY)
                 newBookMark.setName("1");
-            bc.addBookMark(newBookMark);
+            if (bCreateLastPlayedBookMark)
+                bc.setBookMarks(getAutomaticBookMarkAndOldBookMarks(newBookMark, bc.getBookMarks()));
+            else
+                bc.addBookMark(newBookMark);
             this.bookMarkCollections.add(bc);
         }
         else {
@@ -1377,7 +1485,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     int bmMax = 0;
                     for(BookMark bm : bc.getBookMarks())
                     {
-                        bmMax = Integer.parseInt(bm.getName());
+                        bmMax = Integer.parseInt(getDaisyBookMarkIndexValue(bm.getName()));
                         if (bmMax > localMax)
                         {
                             localMax = bmMax;
@@ -1388,11 +1496,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 }
                 newBookMark.setName("" +(max +1));
             }
-            bc.addBookMark(newBookMark);
+            if (bCreateLastPlayedBookMark)
+                bc.setBookMarks(getAutomaticBookMarkAndOldBookMarks(newBookMark, bc.getBookMarks()));
+            else
+                bc.addBookMark(newBookMark);
         }
 
-       // dddddd newBookMark.setDaisybookindexpath();
-      //  bookMarkCollections = mediaControlPane.getBookMarkList();
+        // dddddd newBookMark.setDaisybookindexpath();
+        //  bookMarkCollections = mediaControlPane.getBookMarkList();
         /*
         savePlayPositionAndBookMarks(iIndArrDirFiles, selectedDirectory, playFile,
                 dCurrentPosition, bookMarkCollections,
@@ -1400,6 +1511,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                         radioButtonFreeTts.isSelected() ? cnstFreeTTS : cnstEspeakTTS
                 )));
         */
+    }
+
+    @FXML
+    protected void pressedButtonNewBookMark()
+    {
+        System.out.println("pressedButtonNewBookMark");
+        boolean bCreateLastPlayedBookMark = false;
+        callPressedButtonNewBookMark(bCreateLastPlayedBookMark);
     }
 
     private void readLevelReservedWordsAndLevels()
@@ -1457,12 +1576,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             boolean bMultiLanguage = PlayerController.bUseMultiLang;
             FXMLLoader fxmlLoader = new FXMLLoader(HelpController.class.getResource("javafxplayerhelp.fxml"));
          //   helpController = new HelpController();
+            helpController.setLocale(this.locale);
             fxmlLoader.setController(helpController);
             if (bMultiLanguage) { // there are some differences between none i18 fxml file and i18 fxml file!
              //   locale = PlayerConfig.getLanguageLocale(); // The dff are size of buttons etc.
             //    PlayerController.locale = locale;
                 ResourceBundle bundle = ResourceBundle.getBundle("com/metait/javafxplayer/help/lang", locale);
                 fxmlLoader = new FXMLLoader(HelpController.class.getResource("javafxplayerhelp18.fxml"), bundle);
+                helpController.setLocale(this.locale);
                 fxmlLoader.setController(helpController);
             }
             labelLevel.setFocusTraversable(true);
@@ -1514,6 +1635,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         boolean isPlaying = mediaControlPane.isPlaying();
             if (isPlaying)
                 mediaControlPane.pause();
+            helpController.setLocale(locale);
             helpController.scrollInto("main_header");
             openHelpCtrl();
         if (isPlaying)
@@ -1620,6 +1742,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                             }
                         }
                 }
+
                 BookMarkCollection [] arrBms = config.userBookmarks;
                 if (arrBms == null || arrBms.length == 0)
                     return null;
@@ -2341,6 +2464,10 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private void pressedAudioFileButtonFrom(boolean bCalledFromAudioButtonPressed) {
         if (bCalledFromAudioButtonPressed) {
             fileChooser.getExtensionFilters().clear();
+            try {
+                Thread.sleep(500);
+            }catch (Exception e){
+            }
             FileChooser.ExtensionFilter[] extFilters = getFileExtenstionFilters();
             for (FileChooser.ExtensionFilter ef : extFilters)
                 fileChooser.getExtensionFilters().add(ef);
@@ -2379,6 +2506,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             {
                 isDaisyNcc = true;
                 user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML;
+                mediaControlPane.setTimeHop(60000);
             }
             else
             {
@@ -2557,11 +2685,13 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         if (selectedFile.getName().endsWith(".html") || selectedFile.getName().endsWith(".htm"))
         {
             isDaisyNcc = true;
+            mediaControlPane.setTimeHop(60000);
             buttonPrevLevelLink.setDisable(false);
             buttonNextLevelLink.setDisable(false);
             speechLanaguage = getSpeechLanguage(selectedFile);
             readMediaContentData(selectedFile);
             bWebViewLoaded = true;
+    //       user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML;
             if (autoBookMark == null)
                 webEngine.load(selectedFile.toURI().toString());
             daisyIndexFile = selectedFile;
@@ -2595,6 +2725,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             buttonPreviousTrack.setDisable(true);
             buttonPlay.setDisable(false);
             mediaControlPane.playFile(selectedFile);
+          //  user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_FILE;
             updateSplitPaneDividerPosition();
         }
     }
