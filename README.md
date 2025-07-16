@@ -2,17 +2,17 @@
 
 The JavaPlayer is capable to play 
 different kind of audio and video files or directories,
-daisy 2 books. UI of the application has accessible buttons etc, 
+and daisy 2 books. UI of the application has accessible buttons etc, 
 which are working with screen readers. many buttons also has 
 keyboard keys to press and control.
 
-### Import notice before a first use:</h1>
+### Import notice before a first use:
 
 <p>In linux, like in Ubuntu Desktop, preinstall with next bash command:</p>
 
 <p>sudo apt install ffmpeg and enter</p>
 
-<p>for this player to function well!</p>
+<p>for this player to function well! (That is to speek text.)</p>
 
 ### Usage
 
