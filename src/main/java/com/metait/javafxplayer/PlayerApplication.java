@@ -143,7 +143,13 @@ public class PlayerApplication extends Application {
         m_primaryStage = stage;
         controller.setPrimaryStage(m_primaryStage);
      //   controller.setApplication(this);
-        Parent loadedroot = fxmlLoader.load();
+        Parent loadedroot = null;
+        try {
+            loadedroot = fxmlLoader.load();
+        }catch (Exception loadExp){
+            loadExp.printStackTrace();
+            System.exit(1);
+        }
 
         Scene scene = new Scene(loadedroot, width, height);
         stage.setTitle("Music player for video, music and daisy books");

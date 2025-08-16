@@ -27,6 +27,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.property.DoubleProperty;
 
 import java.io.File;
+import java.util.HashMap;
 
 public class MediaControlPane extends BorderPane {
 
@@ -60,6 +61,8 @@ public class MediaControlPane extends BorderPane {
     private double volume = 0.5;
     // private Label labelCounter = new Label();
     private volatile Duration currentTime = null;
+    private volatile int iSecondsIncurrentTime = 0;
+    private volatile HashMap<Integer,String> hashMapSeconds = new HashMap<>();
   //  private List<BookMarkCollection> m_bookMarkCollections = new ArrayList<>();
     private EventHandler playButtonEventHandler = null;
     private EventHandler prev10sButtonEventHandler = null;
@@ -76,9 +79,14 @@ public class MediaControlPane extends BorderPane {
     private String strMediaPane_6;
     private String strMediaPane_7;
     private String strMediaPane_8;
-
+    private ICallParentOnEvery10Secs sec10Listener = null;
     public int getTimeHop() {
         return iTimeHop;
+    }
+
+    public void add10SecListener(ICallParentOnEvery10Secs par_sec10Listener)
+    {
+        sec10Listener = par_sec10Listener;
     }
 
     public void setTimeHop(int iTimeHop) {
@@ -408,6 +416,7 @@ public class MediaControlPane extends BorderPane {
     {
         setMilliSecsForPlay(msecs, PAR_LEVEL_DIRECTION.DOWNWARD_PAR_LEVEL_DIRECTION);
     }
+
     public void setBackwardAfterMilliSecs(int msecs)
     {
         setMilliSecsForPlay(msecs, PAR_LEVEL_DIRECTION.UPWARD_PAR_LEVEL_DIRECTION);
@@ -469,6 +478,7 @@ public class MediaControlPane extends BorderPane {
             mp.play();
         }
     }
+
     protected void updateValues() {
         if (playTime != null && timeSlider != null && volumeSlider != null) {
             Platform.runLater(new Runnable() {
@@ -777,6 +787,16 @@ public class MediaControlPane extends BorderPane {
             public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
                 //of stopping the double commit.
                 currentTime = newValue;
+                iSecondsIncurrentTime = new Double(currentTime.toSeconds()).intValue();
+              //  System.out.println("" +iSeconsdIncurrentTime);
+                if (iSecondsIncurrentTime % 10 == 0 && hashMapSeconds.get(new Integer(iSecondsIncurrentTime)) == null)
+                {
+                    hashMapSeconds.clear();
+                    hashMapSeconds.put(iSecondsIncurrentTime, new Integer(iSecondsIncurrentTime).toString());
+                    // System.out.println("-> " + iSecondsIncurrentTime);
+                    sec10Listener.callParentOnEvery10Secs(currentTime.toMillis(), iSecondsIncurrentTime,
+                       mp.getMedia().getSource());
+                }
             }
         });
 
