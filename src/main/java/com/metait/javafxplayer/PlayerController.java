@@ -2750,6 +2750,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             return;
         if (!selectedFile.exists())
             return;
+
+        /*
         String ret = null;
         Path path = Paths.get(selectedFile.getAbsolutePath());
 
@@ -2807,6 +2809,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             ioe.printStackTrace();
             return ;
         }
+         */
     }
 
     private void updateSplitPaneDividerPosition()
