@@ -19,7 +19,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.web.WebView?>
 
-<ScrollPane fx:id="scrollPaneMain" fitToHeight="true" fitToWidth="true" prefHeight="634.0" prefWidth="838.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<ScrollPane fx:id="scrollPaneMain" fitToHeight="true" fitToWidth="true" prefHeight="634.0" prefWidth="838.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <content>
       <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="468.0" prefWidth="648.0" spacing="3.0">
           <padding>
@@ -45,6 +45,7 @@
                         </accelerator>
                      </MenuItem>
                      <MenuItem mnemonicParsing="false" onAction="#pressedExitApp" text="Exist" />
+                     <MenuItem mnemonicParsing="false" onAction="#pressedLastDtBooks" text="Edelliset" />
                </items>
              </Menu>
              <Menu mnemonicParsing="false" text="Edit">

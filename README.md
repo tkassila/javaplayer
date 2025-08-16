@@ -1,9 +1,15 @@
 # javaplayer
 
+<<<<<<< Updated upstream
 The JavaPlayer is capable to play 
 different kind of audio and video files or directories,
 and daisy 2 books. UI of the application has accessible buttons etc, 
 which are working with screen readers. many buttons also has 
+=======
+The JavaPlayer is capable of playing different kinds audio and video files 
+or directories, daisy 2 books. The UI of the application has accessible buttons,  
+etc., which are working with screen readers. Many buttons also have  
+>>>>>>> Stashed changes
 keyboard keys to press and control.
 
 ### Import notice before a first use:

@@ -12,6 +12,7 @@ import com.sun.speech.freetts.VoiceManager;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 // import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.event.ActionEvent;
 import javafx.scene.input.KeyCode;
@@ -86,9 +87,9 @@ import javazoom.jl.decoder.JavaLayerException;
  * beginning of mp3 file).
  * When playing, you can stop, pause or select music postion to play.
  */
-public class PlayerController implements IFileContainer, IParLevelSetter {
+public class PlayerController implements IFileContainer, IParLevelSetter, ICallParentOnEvery10Secs {
     @FXML
-    private Label labelSeleectedFile;
+    private Label labelSelectedFile;
    // @FXML
    // private Button buttonAudioDir;
     //@FXML
@@ -136,6 +137,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     @FXML
     private MenuItem menuItemOpenFile;
     @FXML
+    private MenuItem menuItemOpenLastDocs;
+
+    @FXML
     private MenuItem menuItemOpenDaisyFile;
     @FXML
     private Button buttonPrevLevelLink;
@@ -159,6 +163,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private int iMaxSmilParLevel = 0; // readed max  smil levels
     private int iMaxSmilParLevelNormalPage = 0;
     private BookMarkController dialogController = null;
+    private String scrolledWebLink = null;
 
     private DirectoryChooser directoryChooser = new DirectoryChooser();
     private File dirChooser = null;
@@ -187,6 +192,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private File m_selectedFile = null;
     private File selectedDirectory = null;
     private HashMap<String,String> hashMapSmils = new HashMap<>();
+    private HashMap<String,List<String>> hashMapNcc = new HashMap<>();
     private List<String> listSmils = new ArrayList<>();
     private HashMap<String, SmilData> hashMapHRefs = new HashMap<>();
     private HashMap<String,String> hashMapTexts = new HashMap<>();
@@ -242,6 +248,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     private static File static_properties_file2;
     private double screen_height = 0.0;
     private double screen_wight = 0.0;
+    private String lastScrolled_text_id = null;
     public void setScreenValues(double height, double width){
         screen_height = height;
         screen_wight = width;  }
@@ -692,7 +699,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         return ret;
     }
 
-    private void seekPrevOrNextSentenceDatoToPlay(SmilData_Par sdpar, double timeSec, File mp3PlayFile,
+    private void seekPrevOrNextSentenceDataToPlay(SmilData_Par sdpar, double timeSec, File mp3PlayFile,
                                                   PAR_LEVEL_DIRECTION level_direction)
     {
         if (sdpar == null)
@@ -827,7 +834,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         else
         if (iSelectedMetaLevel == this.describeMetaGroups.iNumberOfSentence) {
             bSentenceSelected = true;
-            seekPrevOrNextSentenceDatoToPlay(sdpar, currSecs, mp3PlayFile, level_direction);
+            seekPrevOrNextSentenceDataToPlay(sdpar, currSecs, mp3PlayFile, level_direction);
             return;
         }
         else
@@ -1769,6 +1776,12 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     }
 
     @FXML
+    protected void pressedLastDtBooks()
+    {
+        System.out.println("pressedLastDtBooks");
+    }
+
+    @FXML
     protected void pressedAboutApp()
     {
         Alert alert = new Alert(AlertType.INFORMATION);
@@ -1913,9 +1926,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             }
         });
 
-        labelSeleectedFile.setFocusTraversable(true);
+        labelSelectedFile.setFocusTraversable(true);
      //   labelSeleectedFile.setAccessibleHelp("selected open file or directory");
-        labelSeleectedFile.setAccessibleRole(AccessibleRole.TEXT);
+        labelSelectedFile.setAccessibleRole(AccessibleRole.TEXT);
 
         WebEngine webEngine = webView.getEngine();
         webEngine.setJavaScriptEnabled(true);
@@ -1944,7 +1957,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         directoryChooser.setInitialDirectory(new File("."));
         fileChooser.setInitialDirectory(new File("."));
         // fileChooser.selectedExtensionFilterProperty()
-        FileChooser.ExtensionFilter [] extFilters = getFileExtenstionFilters();
+        FileChooser.ExtensionFilter [] extFilters = getFileExtensionFilters();
         for(FileChooser.ExtensionFilter ef : extFilters)
             fileChooser.getExtensionFilters().add(ef);
 
@@ -1955,6 +1968,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         mediaControlPane = new MediaControlPane(this, strVolume_UI, strTime_UI, str_mediapane_1,
                 str_mediapane_2, str_mediapane_3, str_mediapane_4, str_mediapane_5, str_mediapane_6,
                 str_mediapane_7, str_mediapane_8);
+        mediaControlPane.add10SecListener(this);
         // mediaControl.setExtensionFilter(audiofilter);
         mediaScrollPane.setContent(mediaControlPane);
 
@@ -1966,7 +1980,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
          //   if (strAudioFile != null)
            //     m_selectedFile = new File(strAudioFile);
             if (m_selectedFile != null && m_selectedFile.exists()) {
-                labelSeleectedFile.setText(m_selectedFile.getAbsolutePath());
+                labelSelectedFile.setText(m_selectedFile.getAbsolutePath());
                 String strDir = autoBookMark.getDirPath();
                 File dirFile = null;
                 if (strDir != null && strDir.trim().length()>0 ) {
@@ -1983,7 +1997,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 }
                 if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_DIRECTORY &&
                         dirFile != null && dirFile.exists() && dirFile.isDirectory()) {
-                    labelSeleectedFile.setText(dirFile.getAbsolutePath());
+                    labelSelectedFile.setText(dirFile.getAbsolutePath());
                     selectedDirectory = dirFile;
                     arrAudioFiles = dirFile.listFiles(audiofilter);
                     fileChooser.setInitialDirectory(dirChooser);
@@ -1994,7 +2008,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 else {
                     String htmlDirPath = autoBookMark.getDaisyBookIndexPath();
                     if (htmlDirPath != null && htmlDirPath.trim().length() > 0) {
-                        labelSeleectedFile.setText(htmlDirPath);
+                        labelSelectedFile.setText(htmlDirPath);
                         dirFile = new File(htmlDirPath).getParentFile();
                         selectedDirectory = null;
                         dirChooser = dirFile;
@@ -2007,7 +2021,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                     else
                         if (user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML)
                         {
-                            labelSeleectedFile.setText(m_selectedFile.getAbsolutePath());
+                            labelSelectedFile.setText(m_selectedFile.getAbsolutePath());
                             dirFile = m_selectedFile.getParentFile();
                             selectedDirectory = null;
                             dirChooser = dirFile;
@@ -2021,7 +2035,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         }
     }
 
-    private FileChooser.ExtensionFilter [] getFileExtenstionFilters()
+    private FileChooser.ExtensionFilter [] getFileExtensionFilters()
     {
         String strExts =  String.join(",", arrFileExtenstions);
         strExts = strExts.replaceAll("\\."," *.");
@@ -2433,7 +2447,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             isDaisyNcc = false;
             dirChooser = selectedDirectory;
             bWebViewLoaded = false;
-            labelSeleectedFile.setText(selectedDirectory.getAbsolutePath());
+            labelSelectedFile.setText(selectedDirectory.getAbsolutePath());
            // webView.getEngine().load(null);
             Platform.runLater(new Runnable() {
                 public void run() {
@@ -2468,7 +2482,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 Thread.sleep(500);
             }catch (Exception e){
             }
-            FileChooser.ExtensionFilter[] extFilters = getFileExtenstionFilters();
+            FileChooser.ExtensionFilter[] extFilters = getFileExtensionFilters();
             for (FileChooser.ExtensionFilter ef : extFilters)
                 fileChooser.getExtensionFilters().add(ef);
         }
@@ -2526,7 +2540,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
                 user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_FILE;
             }
             fChooser = selectedFile.getParentFile();
-            labelSeleectedFile.setText(selectedFile.getAbsolutePath());
+            labelSelectedFile.setText(selectedFile.getAbsolutePath());
             selectedDirectory = null;
             // if (webView.getEngine().getLocation() != null)
             //   webView.getEngine().load(null);
@@ -2540,8 +2554,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
     }
 
     private void autoBookMarkPressedPlayButton(BookMark autoBookMark) {
-        if (labelSeleectedFile.getText().trim().length()>0) {
-            File selectedFile = new File(labelSeleectedFile.getText());
+        if (labelSelectedFile.getText().trim().length()>0) {
+            File selectedFile = new File(labelSelectedFile.getText());
             if (selectedFile != null && selectedFile.exists()) {
                 if (selectedFile.isDirectory()) {
                     bWebViewLoaded = false;
@@ -2736,6 +2750,63 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
             return;
         if (!selectedFile.exists())
             return;
+        String ret = null;
+        Path path = Paths.get(selectedFile.getAbsolutePath());
+
+        List<String> listContent = null;
+        String strXml = null;
+        try {
+            try {
+                listContent = Files.readAllLines(path);
+            }catch (IOException ioe2){
+                System.out.println("'" +ioe2.getMessage() +"'");
+                if (ioe2.getMessage().contains("Input length = 1"))
+                    listContent = Files.readAllLines(path, StandardCharsets.ISO_8859_1);
+                else
+                    throw ioe2;
+            }
+            if (listContent.size() > 0) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(listContent);
+                strXml = sb.toString();
+                Pattern pattern = Pattern.compile(
+                        "<a\\shref=\"(?<href>[^\\s]*)?\".*?>(?<text>.*)?</a>", Pattern.CASE_INSENSITIVE);
+                Matcher matcher = pattern.matcher(strXml);
+                String strHref = "", strHrefSmil = "", strHrefVariable = "";
+                String strText = "";
+                int index = -1;
+                int lastMatchPos = 0;
+                while (matcher.find()) {
+                    strHref = matcher.group("href");
+                    strText = matcher.group("text");
+                    if (strHref != null && !strHref.trim().isEmpty())
+                    {
+                        index = strHref.indexOf("#");
+                        if (index > -1)
+                        {
+                            strHrefSmil = strHref.substring(0, index);
+                            strHrefVariable = strHref.substring(index+1);
+                            List<String> refVariables =  hashMapNcc.get(strHrefSmil);
+                            if (refVariables == null)
+                                refVariables = new ArrayList<String>();
+                            refVariables.add(strHrefVariable);
+                            hashMapNcc.put(strHrefSmil, refVariables);
+                        }
+                        else
+                        {
+                            hashMapNcc.put(strHref, new ArrayList<String>());
+                        }
+                    }
+                    lastMatchPos = matcher.end();
+                }
+                if (lastMatchPos != strXml.length())
+                    System.out.println("Invalid string!");
+
+            }
+        }catch (IOException ioe){
+            ioe.printStackTrace();
+            return ;
+        }
     }
 
     private void updateSplitPaneDividerPosition()
@@ -2955,6 +3026,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         //   String value = getValueFromSmilHref(href);
         execJs = "document.getElementById(" +'"' + hrefid +'"' +").scrollIntoView();";
         if (hrefid != null) {
+            scrolledWebLink = hrefid;
             Platform.runLater(new Runnable() {
                 public void run() {
                     WebEngine engine = webView.getEngine();
@@ -3911,19 +3983,19 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         bPreventIncreaseArrayIndex.set(true);
         // System.out.println("handleLinkClick href=" +href);
         String key = getKeyFromSmilHref(href);
-        String fname = getValueFromSmilHref(href);
-        SmilData sm = hashMapSmilData.get(fname);
+        String fName = getValueFromSmilHref(href);
+        SmilData sm = hashMapSmilData.get(fName);
       //  System.out.println("sm=" +sm.toString());
         m_selectedFile = sm.getMp3File();
         double beginClip = -1.0; // undef value
-        SmilData_Par sdpar = sm.getSmilData_ParOfKey(key);
-        if (sdpar != null)
+        SmilData_Par sdPar = sm.getSmilData_ParOfKey(key);
+        if (sdPar != null)
         {
-            String strbeginClip = sdpar.getClip_begin();
+            String strbeginClip = sdPar.getClip_begin();
             if (strbeginClip != null) {
                 try {
                     beginClip = Double.parseDouble(getStrDoubleValue(strbeginClip));
-                    String mp3FileName = sdpar.getAudio_src();
+                    String mp3FileName = sdPar.getAudio_src();
                     if (mp3FileName != null && m_selectedFile != null)
                     {
                         if (!mp3FileName.equals(m_selectedFile.getName()))
@@ -4078,7 +4150,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
 
     @FXML
     protected void onHelloButtonClick() {
-        labelSeleectedFile.setText("Welcome to JavaFX Application!");
+        labelSelectedFile.setText("Welcome to JavaFX Application!");
     }
 
     public SmilData_Par getLeveledParItem(SmilData_Par d_par, SmilData parent)
@@ -4142,5 +4214,93 @@ public class PlayerController implements IFileContainer, IParLevelSetter {
         else
             System.out.println("a SmilDataPar has no classname: " +d_par.getPar_id());
         return d_par;
+    }
+
+    protected int possibleScrollWebviewLink(double currentTime, int iElapsedSecs, String strMediaSource)
+    {
+        int ret = -1;
+        // System.out.println(" -> possibleScrollWebviewLink: currentTime: "  +currentTime +" iElapsedSecs: " +iElapsedSecs +" strMediaSource " +strMediaSource);
+        if (daisyIndexFile == null)
+            return -1;
+        String daisyIndexFilePath = this.daisyIndexFile.getPath();
+        String smilFileName = strMediaSource.replace(".mp3",".smil");
+        String mp3FileName = strMediaSource.replace("file:","");
+
+        SmilData sd = hashMapHRefs.get(mp3FileName);
+        if (sd == null)
+            return -2;
+        int indexHtmlLink = sd.getIndHtmlLink();
+        if (indexHtmlLink > 0)
+            return selectWebviewLink(sd, mp3FileName);
+        return selectWebviewLink(sd, mp3FileName); // seekAndSelectWebViewLink(sd, mp3FileName);
+    }
+
+    protected int selectWebviewLink(SmilData sd, String mp3FileName)
+    {
+        int ret = -1;
+        List<SmilData_Par> listSmilDataPar = sd.getSmilDataParsItems();
+        if (listSmilDataPar == null || listSmilDataPar.size() == 0)
+            return ret;
+
+        String text_id = "";
+        String audio_src = "";
+        char chFileSep = File.separatorChar;
+        int ind = mp3FileName.lastIndexOf(chFileSep);
+        String baseMp3FileName = "";
+        if (ind > -1)
+            baseMp3FileName = mp3FileName.substring(ind+1);
+        int max = listSmilDataPar.size();
+        SmilData_Par parSmilData;
+        for (int i = 0; i < max; i++) {
+            parSmilData = listSmilDataPar.get(i);
+            if (parSmilData == null)
+                continue;
+            text_id = parSmilData.getText_id();
+            audio_src = parSmilData.getAudio_src();
+            if (audio_src != null && audio_src.equals(baseMp3FileName)) {
+                if (lastScrolled_text_id != null && lastScrolled_text_id.equals(text_id))
+                    return ret;
+                lastScrolled_text_id = text_id;
+                // System.out.println("-> scrollIntoWebViewLink(" + text_id +")");
+                scrollIntoWebViewLink(text_id);
+                return 0;
+            }
+        }
+        return ret;
+    }
+
+    protected int seekAndSelectWebViewLink(SmilData sd, String mp3FileName)
+    {
+        return -1;
+    }
+
+    public void callParentOnEvery10Secs(double currentTime, int iElapsedSecs, String strMediaSource)
+    {
+        if (user_selected_to_open != null && user_selected_to_open == USER_SELECTED_OPEN_DIR_OR_FILE.DAISY_HTML)
+        {
+            // DDDD
+            Task<Integer> task = new Task<Integer>() {
+                @Override protected Integer call() throws Exception {
+                    int iterations = 0;
+                    return possibleScrollWebviewLink(currentTime, iElapsedSecs, strMediaSource);
+                }
+
+                @Override protected void succeeded() {
+                    super.succeeded();
+                    updateMessage("Done!");
+                }
+
+                @Override protected void cancelled() {
+                    super.cancelled();
+                    updateMessage("Cancelled!");
+                }
+
+                @Override protected void failed() {
+                    super.failed();
+                    updateMessage("Failed!");
+                }
+            };
+            task.run();
+        }
     }
 }
