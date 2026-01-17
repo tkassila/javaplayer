@@ -1,5 +1,5 @@
 #! /usr/bin/sh
-export JAVA_HOME=/home/tk/.sdkman/candidates/java/11.0.28.fx-librca
+export JAVA_HOME=/home/tk/.sdkman/candidates/java/11.0.29.fx-librca
 export PATH_TO_FX=$JAVA_HOME/lib
 echo This app needing javaFX 11 !
 # java -version

@@ -32,6 +32,7 @@ public class PlayerApplication extends Application {
         startUI(ret);
         return ret;
     }
+
     private void startUI(Stage stage) throws IOException
     {
         Locale def_locale = Locale.getDefault();
