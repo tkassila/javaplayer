@@ -1,6 +1,5 @@
 package com.metait.javafxplayer.help;
 
-import com.metait.javafxplayer.HyperLinkRedirectListener;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.event.EventHandler;
@@ -9,15 +8,12 @@ import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
@@ -32,11 +28,6 @@ import javafx.beans.value.ObservableValue;
 // import javax.xml.parsers.DocumentBuilderFactory;
 // import javax.xml.XMLConstants;
 //import org.w3c.dom.Document;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -44,7 +35,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -209,7 +199,7 @@ public class HelpController {
             public void changed(ObservableValue<? extends TreeItem<TreeItemString>> observable,
                                 TreeItem<TreeItemString> oldValue, TreeItem<TreeItemString> newValue) {
                 // newValue represents the selected itemTree
-                treeItemChanded(oldValue, newValue);
+                treeItemChanged(oldValue, newValue);
             }
         });
         pressedButtonTreeView();
@@ -286,7 +276,7 @@ public class HelpController {
         }
     }
 
-    private void treeItemChanded(TreeItem<TreeItemString> oldValue, TreeItem<TreeItemString> newValue)
+    private void treeItemChanged(TreeItem<TreeItemString> oldValue, TreeItem<TreeItemString> newValue)
     {
         if (newValue != null && newValue.getValue() != null && newValue.getValue().toString() != null
            && !newValue.getValue().toString().toLowerCase().equals("index"))

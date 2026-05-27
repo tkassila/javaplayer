@@ -3027,14 +3027,56 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     private void scrollIntoWebViewLink(String hrefid)
     {
         //   String value = getValueFromSmilHref(href);
-        execJs = "document.getElementById(" +'"' + hrefid +'"' +").scrollIntoView();";
+        // execJs = "document.getElementById(" +'"' + hrefid +'"' +").scrollIntoView();";
+        execJs = "// 1. Etsitään elementti id-tunnuksella ja skrollataan se näkyviin\n" +
+                "const element = document.getElementById(" +'\"' + hrefid +'\"' +");\n" +
+                "if (element) {\n" +
+                "  element.scrollIntoView();\n" +
+                "\n" +
+                "  // 2. Odotetaan puoli sekuntia (500 ms), jotta skrollaus ehtii alkaa/loppua\n" +
+                "  setTimeout(() => {\n" +
+                "    const range = document.createRange();\n" +
+                "    const selection = window.getSelection();\n" +
+                "\n" +
+                "    // Valitaan elementin sisältämä tekstisolmu\n" +
+                "    range.selectNodeContents(element);\n" +
+                "    \n" +
+                "    // Tyhjennetään vanhat valinnat ja asetetaan uusi tekstivalinta\n" +
+                "    selection.removeAllRanges();\n" +
+                "    selection.addRange(range);\n" +
+                "  }, 500); \n" +
+                "}";
+
+        /*
+        execJs = "// 1. Esitellään elementti \n" +
+        "var element = document.getElementById(" +'\"' + hrefid +'\"' +");\n" +
+        "if (element) {\n" +
+            "// 2. Rullataan elementti näkyviin heti\n" +
+            "element.scrollIntoView({ behavior: \"smooth\" });\n" +
+            "// 3. Odotetaan hetki (esim. 500 millisekuntia) ennen tekstin valitsemista\n" +
+            "setTimeout(() => {\n" +
+            "const range = document.createRange();\n" +
+            "const selection = window.getSelection();\n" +
+            "// Valitaan elementin sisältämä teksti\n" +
+            "range.selectNodeContents(element);\n" +
+            "selection.removeAllRanges();\n" +
+            "selection.addRange(range);\n" +
+        "}, 1000);\n" +
+        "}\n";
+         */
+
         if (hrefid != null) {
             scrolledWebLink = hrefid;
             Platform.runLater(new Runnable() {
                 public void run() {
                     WebEngine engine = webView.getEngine();
-                    if (engine != null)
-                        engine.executeScript(execJs);
+                    if (engine != null) {
+                        try {
+                            engine.executeScript(execJs);
+                        }catch (Exception e){
+                            System.err.println("Js error: " +e.getMessage() );
+                        }
+                    }
                 }
             });
         }
