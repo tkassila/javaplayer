@@ -6,7 +6,7 @@ import com.metait.javafxplayer.bookmark.BookMarkController;
 import com.metait.javafxplayer.daisy2.*;
 import com.metait.javafxplayer.help.HelpController;
 
-// import com.sun.jndi.toolkit.url.Uri;
+// import com.sun.jndi.config.url.Uri;
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
 import javafx.application.Platform;
@@ -3029,7 +3029,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         //   String value = getValueFromSmilHref(href);
         // execJs = "document.getElementById(" +'"' + hrefid +'"' +").scrollIntoView();";
         execJs = "// 1. Etsitään elementti id-tunnuksella ja skrollataan se näkyviin\n" +
-                "const element = document.getElementById(" +'\"' + hrefid +'\"' +");\n" +
+                "var element = document.getElementById(" +'\"' + hrefid +'\"' +");\n" +
                 "if (element) {\n" +
                 "  element.scrollIntoView();\n" +
                 "\n" +
@@ -3108,6 +3108,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             SmilData sd = hashMapHRefs.get(strFileName);
             String href = sd.getHref();
             String key = getKeyFromSmilHref(href);
+            scrollIntoWebViewLink(key);
+
+            /*
          //   String value = getValueFromSmilHref(href);
             String docExec = "document.getElementById(\"" + key +"\")";
             execJs = "if (document != undefined && document != null && " +docExec +" != undefined && " +docExec +" != null) document.getElementById(" +'"' + key +'"' +").scrollIntoView();";
@@ -3121,6 +3124,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                     }
                 });
             }
+             */
             /*
             Document document = engine.getDocument();
             if (document != null)
