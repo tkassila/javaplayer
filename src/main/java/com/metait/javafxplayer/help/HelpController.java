@@ -75,6 +75,7 @@ public class HelpController {
     private TextArea textArea = new TextArea();
     // private ScrollPane scrollPane = new ScrollPane(textArea);
     private String strRawHelp = "";
+    private String strEarlierScrollId = null;
     private double indLastSelectedTextArea = -1;
     private int iSelectAreaStart = -1;
     private Locale locale;
@@ -674,6 +675,14 @@ public class HelpController {
     public void scrollInto(String p_htmlid)
     {
         if (p_htmlid != null && p_htmlid.trim().length()>0) {
+
+            if (strEarlierScrollId != null && strEarlierScrollId.equals(p_htmlid))
+            {
+                return;
+            }
+            else {
+                strEarlierScrollId = new String(p_htmlid);
+            }
 
             execJs = "document.getElementById(" + '"' + p_htmlid + '"' + ").scrollIntoView();";
             execJs2 = getBackGroundOf(p_htmlid, "yellow");
