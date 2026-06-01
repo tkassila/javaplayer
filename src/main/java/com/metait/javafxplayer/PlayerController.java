@@ -170,6 +170,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     private File fChooser = null;
     private FileChooser fileChooser = new FileChooser();
     private Stage primaryStage;
+    private String strEarlierScrollId = null;
 
     private String strVolume_UI = "Volume";
     private String strTime_UI = "Time";
@@ -3026,6 +3027,15 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
 
     private void scrollIntoWebViewLink(String hrefid)
     {
+        if (hrefid == null)
+            return;
+        if (strEarlierScrollId != null && strEarlierScrollId.equals(hrefid))
+        {
+            return;
+        }
+        else {
+            strEarlierScrollId = new String(hrefid);
+        }
         //   String value = getValueFromSmilHref(href);
         // execJs = "document.getElementById(" +'"' + hrefid +'"' +").scrollIntoView();";
         execJs = "// 1. Etsitään elementti id-tunnuksella ja skrollataan se näkyviin\n" +
