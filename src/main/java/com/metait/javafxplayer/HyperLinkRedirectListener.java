@@ -24,7 +24,7 @@ public class HyperLinkRedirectListener implements ChangeListener<Worker.State>, 
     private static final String ANCHOR_TAG = "a";
 
     private final WebView webView;
-    private PlayerController m_playerController;
+    private final PlayerController m_playerController;
 
     public HyperLinkRedirectListener(WebView webView, PlayerController playerController)
     {

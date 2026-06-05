@@ -82,10 +82,10 @@ import javazoom.jl.decoder.JavaLayerException;
 
 /**
  * This class can open javafx media supported audio and video files, and also daisy 2 html files to listen.
- * If a daisybook is selected as form of .html file, you can listen book with automactic play, select next
+ * If a daisybook is selected as form of .html file, you can listen book with automatic play, select next
  * and previous .mp3 file or click from webview component web pageg link (= per book xx page or from the
  * beginning of mp3 file).
- * When playing, you can stop, pause or select music postion to play.
+ * When playing, you can stop, pause or select music position to play.
  */
 public class PlayerController implements IFileContainer, IParLevelSetter, ICallParentOnEvery10Secs {
     @FXML
@@ -171,6 +171,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     private FileChooser fileChooser = new FileChooser();
     private Stage primaryStage;
     private String strEarlierScrollId = null;
+    private String strEarlierClickedUrl = null;
+    private final HashMap<String,String> hashMapScrolleds = new HashMap<>();
 
     private String strVolume_UI = "Volume";
     private String strTime_UI = "Time";
@@ -2725,10 +2727,18 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                 arrAudioFiles = selectedFile.getParentFile().listFiles(audiofilter);
                 buttonNextTrack.setDisable(false);
                 buttonPreviousTrack.setDisable(false);
+                /*
+                File selectedFile, double beginClip,
+                             int p_iIndArrDirFiles, int iArraySize, String clickedText
+                 */
+                //  user_selected_to_open = USER_SELECTED_OPEN_DIR_OR_FILE.AUDIO_FILE;
+                updateSplitPaneDividerPosition();
                 Platform.runLater(new Runnable() {
                     public void run() {
                         webEngine.load(daisyIndexFile.toURI().toString());
                         // mediaControlPane.playThisFile(m_selectedFile, iBeginClip, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                      //  mediaControlPane.playThisFile(m_selectedFile, iBeginClip, iIndArrDirFiles,
+                        //        arrAudioFiles != null ? arrAudioFiles.length : 0, "");
                     }
                 });
             }
@@ -3025,7 +3035,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         mediaControlPane.playThisFile(m_selectedFile, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
     }
 
-    private void scrollIntoWebViewLink(String hrefid)
+    private void scrollIntoWebViewLinkKey(String hrefid)
     {
         if (hrefid == null)
             return;
@@ -3036,9 +3046,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         else {
             strEarlierScrollId = new String(hrefid);
         }
+        if (hashMapScrolleds.containsKey(hrefid))
+            return;
+        strEarlierClickedUrl = null;
+
+        hashMapScrolleds.put(hrefid,hrefid);
         //   String value = getValueFromSmilHref(href);
         // execJs = "document.getElementById(" +'"' + hrefid +'"' +").scrollIntoView();";
-        execJs = "// 1. Etsitään elementti id-tunnuksella ja skrollataan se näkyviin\n" +
+        execJs = " // 1. Etsitään elementti id-tunnuksella ja skrollataan se näkyviin\n" +
                 "var element = document.getElementById(" +'\"' + hrefid +'\"' +");\n" +
                 "if (element) {\n" +
                 "  element.scrollIntoView();\n" +
@@ -3118,7 +3133,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             SmilData sd = hashMapHRefs.get(strFileName);
             String href = sd.getHref();
             String key = getKeyFromSmilHref(href);
-            scrollIntoWebViewLink(key);
+            scrollIntoWebViewLinkKey(key);
 
             /*
          //   String value = getValueFromSmilHref(href);
@@ -3261,6 +3276,19 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         File f = null;
         String mp3FPath = null;
         ReadSmillDataFromFile pair;
+
+        if (strEarlierClickedUrl != null && strEarlierClickedUrl.equals(strDepth))
+            return;
+        strEarlierClickedUrl = strDepth;
+        hashMapScrolleds.clear();
+        strEarlierScrollId = null;
+
+        webView.getEngine().executeScript("function clearSelection()\n" +
+                "{\n" +
+                "if (window.getSelection) {window.getSelection().removeAllRanges();}\n" +
+                " else if (document.selection) {document.selection.empty();}\n" +
+                "}\n" +
+                "clearSelection();");
 
         metadataSmilDataPar.setStrCds(strCds);
         metadataSmilDataPar.setStrCreator(strCreator);
@@ -4034,11 +4062,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
 
     public void handleLinkClick(String href, String id, String text)
     {
-    //    System.out.println("-2- href=" +href +" text=" +text);
         if (m_selectedFile == null /* || (!m_selectedFile.getName().endsWith(".html") && !m_selectedFile.getName().endsWith(".htm")) */)
             return;
         if (bPreventIncreaseArrayIndex.get())
             return;
+        Platform.runLater(new Runnable() {
+            public void run() {
+    //    System.out.println("-2- href=" +href +" text=" +text);
+        mediaControlPane.stop();
         bPreventIncreaseArrayIndex.set(true);
         // System.out.println("handleLinkClick href=" +href);
         String key = getKeyFromSmilHref(href);
@@ -4071,12 +4102,14 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         bPreventIncreaseArrayIndex.set(false);
         if (iIndArrDirFiles > -1 && bWebViewLoaded)
         {
-            scrollIntoWebViewLink(key);
+            scrollIntoWebViewLinkKey(key);
             labelMsg.setText(text);
          //  labelMsg.setAccessibleHelp(text);
         }
 
         mediaControlPane.playThisFile(m_selectedFile, beginClip, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, text);
+            }
+        });
     }
 
     private int getIndArrOfListMp3Files(File selectedFile)
@@ -4321,7 +4354,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                     return ret;
                 lastScrolled_text_id = text_id;
                 // System.out.println("-> scrollIntoWebViewLink(" + text_id +")");
-                scrollIntoWebViewLink(text_id);
+                scrollIntoWebViewLinkKey(text_id);
                 return 0;
             }
         }

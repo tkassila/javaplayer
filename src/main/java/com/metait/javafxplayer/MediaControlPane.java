@@ -814,7 +814,10 @@ public class MediaControlPane extends BorderPane {
         mp.setOnPaused(new Runnable() {
             public void run() {
           //     System.out.println("onPaused");
+                duration = mp.getMedia().getDuration();
+               // duration = duration.subtract(new Duration(2000));
                 playButton.setText("   " +">" +"   ");
+                updateValues();
             }
         });
 
