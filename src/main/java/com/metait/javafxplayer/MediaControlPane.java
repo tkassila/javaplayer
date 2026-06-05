@@ -604,6 +604,10 @@ public class MediaControlPane extends BorderPane {
     public void stop() {
         if(mp != null && mp.getStatus() == MediaPlayer.Status.PLAYING){
             mp.stop();
+            try {
+                Thread.sleep(500);
+            } catch (Exception e){
+            }
         }
     }
 
@@ -814,10 +818,10 @@ public class MediaControlPane extends BorderPane {
         mp.setOnPaused(new Runnable() {
             public void run() {
           //     System.out.println("onPaused");
-                duration = mp.getMedia().getDuration();
+             //   duration = mp.getMedia().getDuration();
                // duration = duration.subtract(new Duration(2000));
                 playButton.setText("   " +">" +"   ");
-                updateValues();
+               // updateValues();
             }
         });
 
