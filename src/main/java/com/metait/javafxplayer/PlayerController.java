@@ -164,6 +164,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     private int iMaxSmilParLevelNormalPage = 0;
     private BookMarkController dialogController = null;
     private String scrolledWebLink = null;
+    private static final boolean bDebug = false;
 
     private DirectoryChooser directoryChooser = new DirectoryChooser();
     private File dirChooser = null;
@@ -352,7 +353,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                         }
                     }
                     bufferedReader.close();
-                    System.out.println("Successfully read from the file: " +appFile.getAbsolutePath());
+                    if (bDebug)
+                       System.out.println("Successfully read from the file: " +appFile.getAbsolutePath());
                 } catch (IOException e) {
                     System.out.println("An error occurred.");
                     e.printStackTrace();
@@ -653,7 +655,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     @FXML
     protected void pressedButtonPrevLevelLink()
     {
-        System.out.println("pressedButtonPrevLevelLink");
+        if (bDebug)
+           System.out.println("pressedButtonPrevLevelLink");
         if (currentMetaGroup == null)
             return;
         seekPrevOrNextMediaGroupDatoToPlay(currentMetaGroup, this.iSelectedSmilParLevel,
@@ -663,7 +666,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     @FXML
     protected void pressedButtonNextLevelLink()
     {
-        System.out.println("pressedButtonNextLevelLink");
+        if (bDebug)
+            System.out.println("pressedButtonNextLevelLink");
         seekPrevOrNextMediaGroupDatoToPlay(currentMetaGroup, this.iSelectedSmilParLevel,
                 PAR_LEVEL_DIRECTION.DOWNWARD_PAR_LEVEL_DIRECTION);
     }
@@ -822,10 +826,12 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         double currSecs = current_time / 1000;
         File mp3PlayFile = mediaControlPane.getPlayFile();
         SmilData_Par sdpar = getCurrentLinkIndex(current_time, mp3PlayFile);
-//        SmilData_Par parent = sdpar.get
-        System.out.println("pressedButtonNextLink m_selectedFile = " +m_selectedFile.getAbsolutePath());
-        System.out.println("pressedButtonNextLink current time = " +current_time /1000);
-        System.out.println("pressedButtonNextLink sdpar = " +(sdpar != null ? sdpar.toString() : "null"));
+//        SmilData_Par parent = sdpar.
+        if (bDebug) {
+            System.out.println("pressedButtonNextLink m_selectedFile = " + m_selectedFile.getAbsolutePath());
+            System.out.println("pressedButtonNextLink current time = " + current_time / 1000);
+            System.out.println("pressedButtonNextLink sdpar = " + (sdpar != null ? sdpar.toString() : "null"));
+        }
 
         String metaClass = null;
         boolean bPageClassSelected = false;
@@ -1234,7 +1240,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             stage.setOnCloseRequest((EventHandler<WindowEvent>) new EventHandler<WindowEvent>() {
                 public void handle(WindowEvent we) {
                     // bookMarkCollections = dialogController.getBookMarks();
-                    System.out.println("handle(WindowEvent we");
+                    if (bDebug)
+                        System.out.println("handle(WindowEvent we");
                     if (dialogController != null)
                         bookMarkCollections = dialogController.getBookMarkCollections();
                     boolean bValue = dialogController.getGotoBMarkPressed();
@@ -1526,7 +1533,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     @FXML
     protected void pressedButtonNewBookMark()
     {
-        System.out.println("pressedButtonNewBookMark");
+        if (bDebug)
+            System.out.println("pressedButtonNewBookMark");
         boolean bCreateLastPlayedBookMark = false;
         callPressedButtonNewBookMark(bCreateLastPlayedBookMark);
     }
@@ -1620,7 +1628,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     @FXML
     protected void pressedButtonHelp()
     {
-        System.out.println("pressedButtonHelp");
+        if (bDebug)
+            System.out.println("pressedButtonHelp");
             /*
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(HelpController.class.getResource("javafxplayerhelp.fxml"));
@@ -2115,13 +2124,18 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     @FXML
     public void pressedButtonPrevLink()
     { // todo
-        System.out.println("pressedButtonPrevLink");
-        System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
-        System.out.println("arrAudioFiles=" +arrAudioFiles);
+        if (bDebug) {
+            System.out.println("pressedButtonPrevLink");
+            System.out.println("bPreventIncreaseArrayIndex=" + bPreventIncreaseArrayIndex.toString());
+            System.out.println("arrAudioFiles=" + arrAudioFiles);
+        }
         if (arrAudioFiles != null)
+            if (bDebug)
             System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
-        System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
-        System.out.println("");
+        if (bDebug)
+            System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
+        if (bDebug)
+            System.out.println("");
 
         if (m_selectedFile == null || !bWebViewLoaded )
             return;
@@ -2131,17 +2145,23 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
 
         File mp3PlayFile = mediaControlPane.getPlayFile();
         double current_time = mediaControlPane.getStopAndCurrentTime();
-        System.out.println("pressedButtonPrevLink current time = " +current_time /1000);
+        if (bDebug)
+            System.out.println("pressedButtonPrevLink current time = " +current_time /1000);
         SmilData_Par sdpar = getCurrentLinkIndex(current_time, mp3PlayFile);
-        System.out.println("pressedButtonPrevLink sdpar = " +(sdpar != null ? sdpar.toString() : "null"));
+        if (bDebug)
+            System.out.println("pressedButtonPrevLink sdpar = " +(sdpar != null ? sdpar.toString() : "null"));
 
         NewSelectedFile ret = null;
-        System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
-        System.out.println("arrAudioFiles=" +arrAudioFiles);
+        if (bDebug)
+            System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
+        if (bDebug)
+            System.out.println("arrAudioFiles=" +arrAudioFiles);
         if (arrAudioFiles != null)
             System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
-        System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
-        System.out.println("");
+        if (bDebug)
+            System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
+        if (bDebug)
+            System.out.println("");
 
         selectLinkFileAndStartTime(sdpar, mp3PlayFile, -1);
         bPreventIncreaseArrayIndex.set(false);
@@ -2150,14 +2170,18 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     @FXML
     public void pressedButtonNextLink()
     {
-        System.out.println("pressedButtonNextLink");
-
-        System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
-        System.out.println("arrAudioFiles=" +arrAudioFiles);
+        if (bDebug)
+            System.out.println("pressedButtonNextLink");
+        if (bDebug)
+            System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
+        if (bDebug)
+            System.out.println("arrAudioFiles=" +arrAudioFiles);
         if (arrAudioFiles != null)
             System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
-        System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
-        System.out.println("");
+        if (bDebug)
+            System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
+        if (bDebug)
+            System.out.println("");
 
         if (m_selectedFile == null || !bWebViewLoaded )
             return;
@@ -2168,18 +2192,26 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         double current_time = mediaControlPane.getStopAndCurrentTime();
         File mp3PlayFile = mediaControlPane.getPlayFile();
         SmilData_Par sdpar = getCurrentLinkIndex(current_time, mp3PlayFile);
-        System.out.println("pressedButtonNextLink m_selectedFile = " +m_selectedFile.getAbsolutePath());
-        System.out.println("pressedButtonNextLink current time = " +current_time /1000);
-        System.out.println("pressedButtonNextLink sdpar = " +(sdpar != null ? sdpar.toString() : "null"));
+        if (bDebug)
+            System.out.println("pressedButtonNextLink m_selectedFile = " +m_selectedFile.getAbsolutePath());
+        if (bDebug)
+            System.out.println("pressedButtonNextLink current time = " +current_time /1000);
+        if (bDebug)
+            System.out.println("pressedButtonNextLink sdpar = " +(sdpar != null ? sdpar.toString() : "null"));
 
         NewSelectedFile ret = null;
-        System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
-        System.out.println("arrAudioFiles=" +arrAudioFiles);
+        if (bDebug)
+            System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
+        if (bDebug)
+            System.out.println("arrAudioFiles=" +arrAudioFiles);
         if (arrAudioFiles != null)
             System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
-        System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
-        System.out.println("pressedButtonNextLink m_selectedFile = " +m_selectedFile.getAbsolutePath());
-        System.out.println("");
+        if (bDebug)
+            System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
+        if (bDebug)
+            System.out.println("pressedButtonNextLink m_selectedFile = " +m_selectedFile.getAbsolutePath());
+        if (bDebug)
+            System.out.println("");
 
         selectLinkFileAndStartTime(sdpar, mp3PlayFile, +1);
         bPreventIncreaseArrayIndex.set(false);
@@ -2232,7 +2264,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         else
         {
             newInd = sdpar.getInd();
-            System.out.println("sdpar.getInd =" +newInd);
+            if (bDebug)
+                System.out.println("sdpar.getInd =" +newInd);
             if (addOrSubtract == 1)
                 newInd++;
             else
@@ -2304,7 +2337,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             return;
         }
 
-        System.out.println("newInd =" +newInd);
+        if (bDebug)
+            System.out.println("newInd =" +newInd);
         SmilData sd = hashMapHRefs.get(mp3PlayFile.getAbsolutePath());
         SmilData_Par par = null;
         List<SmilData_Par> pars = null;
@@ -2948,14 +2982,19 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     public NewSelectedFile getPossibleNextPlayfile()
     {
         NewSelectedFile ret = null;
-        System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
-        System.out.println("arrAudioFiles=" +arrAudioFiles);
+        if (bDebug)
+            System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
+        if (bDebug)
+            System.out.println("arrAudioFiles=" +arrAudioFiles);
         if (arrAudioFiles != null)
             System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
-        System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
-        System.out.println("");
+        if (bDebug)
+            System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
+        if (bDebug)
+            System.out.println("");
 
-        System.out.println("");
+        if (bDebug)
+            System.out.println("");
         if (bPreventIncreaseArrayIndex.get() || arrAudioFiles == null || arrAudioFiles.length == 0)
             return null;
         if (iIndArrDirFiles < 0 || iIndArrDirFiles >= arrAudioFiles.length)
@@ -2965,7 +3004,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             return null;
         int iNewInd = iIndArrDirFiles;
         iNewInd++;
-        System.out.println("iNewInd=" +iNewInd);
+        if (bDebug)
+            System.out.println("iNewInd=" +iNewInd);
         if (iNewInd < 0 || iNewInd >= arrAudioFiles.length)
         {
             bPreventIncreaseArrayIndex.set(false);
@@ -2973,7 +3013,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         }
         iIndArrDirFiles = iNewInd;
         m_selectedFile = arrAudioFiles[iIndArrDirFiles];
-        System.out.println("new m_selectedFile=" +m_selectedFile.getAbsolutePath());
+        if (bDebug)
+            System.out.println("new m_selectedFile=" +m_selectedFile.getAbsolutePath());
         ret = new NewSelectedFile();
         ret.iSize = arrAudioFiles.length;
         ret.iCounter = iIndArrDirFiles;
@@ -2994,7 +3035,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             return null;
         int iNewInd = iIndArrDirFiles;
         iNewInd--;
-        System.out.println("iNewInd=" +iNewInd);
+        if (bDebug)
+            System.out.println("iNewInd=" +iNewInd);
         if (iNewInd < 0 || iNewInd >= arrAudioFiles.length)
         {
             bPreventIncreaseArrayIndex.set(false);
@@ -3975,7 +4017,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
          //   radioButtonFreeTts.setDisable(false);
             String strPathEnv = System.getenv("PATH");
             try {
-                System.out.println("strPathEnv=" +strPathEnv);
+                if (bDebug)
+                    System.out.println("strPathEnv=" +strPathEnv);
                 com.harium.hci.espeak.Voice manVoice = new com.harium.hci.espeak.Voice();
                 if (speechLanaguage == null || speechLanaguage.trim().length() == 0)
                     manVoice.setName("fi-fi");
@@ -4015,7 +4058,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     }
     public void handleFocusIn(String href, String id, String text)
     {
-        System.out.println("handleFocusIn href=" +href +" id=" +id +" text=" +text);
+        if (bDebug)
+            System.out.println("handleFocusIn href=" +href +" id=" +id +" text=" +text);
         possibleSpeekText(text);
         /*
         Audio audio = Audio.getInstance();
