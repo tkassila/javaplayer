@@ -25,6 +25,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.beans.binding.Bindings;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.DoubleProperty;
+import javafx.animation.PauseTransition;
 
 import java.io.File;
 import java.util.HashMap;
@@ -43,9 +44,12 @@ public class MediaControlPane extends BorderPane {
     private /* HBox */ FlowPane mediaBar;
     private Media buzzer;
     private final Button playButton = new Button(">");
+    // Define the cooldown duration (e.g., 3 seconds)
+    Duration cooldownTime = Duration.seconds(3);
+    PauseTransition playButtonsPause = new PauseTransition(cooldownTime);
     private final Button prev10sButton = new Button("< 10s");
     private final Button next10sButton = new Button("10s >");
-    private Label centerLabel = new Label("Open a file!");
+    private final Label centerLabel = new Label("Open a file!");
     private File m_selectedFile = null;
     private File currentPlayFile = null;
     private File m_selectedDir = null;
@@ -211,7 +215,9 @@ public class MediaControlPane extends BorderPane {
 
         prev10sButtonEventHandler = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
+                disAbleUserControls(true);
                 setBackwardAfterMilliSecs(iTimeHop);
+                playButtonsPause.play();
                 /*
                 MediaPlayer.Status status = mp.getStatus();
 
@@ -257,7 +263,9 @@ public class MediaControlPane extends BorderPane {
 
         next10sButtonEventHandler = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
+               disAbleUserControls(true);
                setForwardAfterMilliSecs(iTimeHop);
+                playButtonsPause.play();
               /*
                 MediaPlayer.Status status = mp.getStatus();
 
@@ -299,6 +307,10 @@ public class MediaControlPane extends BorderPane {
 
         next10sButton.setOnAction(next10sButtonEventHandler);
 
+        playButtonsPause.setOnFinished(event -> {
+            disAbleUserControls(false);
+        });
+
         playButtonEventHandler = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
                 MediaPlayer.Status status = mp.getStatus();
@@ -308,6 +320,7 @@ public class MediaControlPane extends BorderPane {
                     return;
                 }
 
+                disAbleUserControls(true);
                 if (status == MediaPlayer.Status.PAUSED
                         || status == MediaPlayer.Status.READY
                         || status == MediaPlayer.Status.STOPPED) {
@@ -317,9 +330,11 @@ public class MediaControlPane extends BorderPane {
                         atEndOfMedia = false;
                     }
                     mp.play();
+               //     disAblePlayButtonForXSleep(3000);
                 } else {
                     mp.pause();
                 }
+                playButtonsPause.play();
             }
         };
 
@@ -410,6 +425,22 @@ public class MediaControlPane extends BorderPane {
 
         iHeigth = getHeight();
         iWidth = getWidth();
+    }
+
+    private void disAblePlayButtonForXSleep(int msecThreadSleep)
+    {
+        Platform.runLater(new Runnable() {
+            public void run() {
+                // playButton.setDisable(true);
+                disAbleUserControls(true);
+                try {
+                    Thread.sleep(msecThreadSleep);
+                } catch (Exception e) {
+                }
+               // playButton.setDisable(false);
+                disAbleUserControls(false);
+            }
+        });
     }
 
     public void setForwardAfterMilliSecs(int msecs)
@@ -810,7 +841,12 @@ public class MediaControlPane extends BorderPane {
                     mp.pause();
                     stopRequested = false;
                 } else {
-                    playButton.setText("   " +"||" +"   ");
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            playButton.setText("   " + "||" + "   ");
+                        }
+                    });
+                 //   disAblePlayButtonForXSleep(3000);
                 }
             }
         });
@@ -820,7 +856,12 @@ public class MediaControlPane extends BorderPane {
           //     System.out.println("onPaused");
              //   duration = mp.getMedia().getDuration();
                // duration = duration.subtract(new Duration(2000));
-                playButton.setText("   " +">" +"   ");
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            playButton.setText("   " + ">" + "   ");
+                        }
+                        });
+              //  disAblePlayButtonForXSleep(3000);
                // updateValues();
             }
         });

@@ -220,6 +220,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     private BookMark autoBookMark = null;
     private File daisyIndexFile = null;
     private double dCurrentPosition = -1.0;
+    private boolean bIsStarting = true;
 
     private HelpController helpController = new HelpController();
     private Stage stageHelp;
@@ -2042,6 +2043,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                         }
 
                     autoBookMarkPressedPlayButton(autoBookMark);
+                    bIsStarting = false;
                 }
             }
         }
