@@ -2192,7 +2192,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         if (bDebug)
             System.out.println("arrAudioFiles=" +arrAudioFiles);
         if (arrAudioFiles != null)
-            System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
+            if (bDebug) {
+                System.out.println("arrAudioFiles.length=" + arrAudioFiles.length);
+            }
         if (bDebug)
             System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
         if (bDebug)
@@ -2220,7 +2222,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         if (bDebug)
             System.out.println("arrAudioFiles=" +arrAudioFiles);
         if (arrAudioFiles != null)
-            System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
+            if (bDebug) {
+                System.out.println("arrAudioFiles.length=" + arrAudioFiles.length);
+            }
         if (bDebug)
             System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
         if (bDebug)
@@ -3008,7 +3012,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         if (bDebug)
             System.out.println("arrAudioFiles=" +arrAudioFiles);
         if (arrAudioFiles != null)
-            System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
+            if (bDebug) {
+                System.out.println("arrAudioFiles.length=" + arrAudioFiles.length);
+            }
         if (bDebug)
             System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
         if (bDebug)
