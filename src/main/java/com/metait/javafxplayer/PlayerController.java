@@ -206,6 +206,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     private boolean bWebViewLoaded = false;
     private File [] arrAudioFiles = null;
     private volatile int iIndArrDirFiles = -1;
+    private volatile boolean isUnderScrolling = false;
     private AtomicBoolean bPreventIncreaseArrayIndex = new AtomicBoolean(false);
     private String execJs = null;
     private Thread voiceReadingThread;
@@ -1184,8 +1185,10 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     {
         if (bookMark != null)
         {
-            if (mediaControlPane.isPlaying())
+            if (mediaControlPane.isPlaying()) {
                 mediaControlPane.pause();
+                dCurrentPosition = mediaControlPane.getCurrentTime();
+            }
             String playFilePath = bookMark.getPlayFilePath();
             filePlay = new File(playFilePath);
             if (bookMark.getType().equals(BookMarkCollection.BOOKMARK_TYPE.DAISY.toString()))
@@ -1213,8 +1216,10 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
 
 
             boolean isPlaying = mediaControlPane.isPlaying();
-            if (isPlaying)
+            if (isPlaying) {
                 mediaControlPane.pause();
+                dCurrentPosition = mediaControlPane.getCurrentTime();
+            }
 
             boolean bMultiLanguage = PlayerController.bUseMultiLang;
             FXMLLoader fxmlLoader = new FXMLLoader(
@@ -1653,13 +1658,16 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
              */
 
         boolean isPlaying = mediaControlPane.isPlaying();
-            if (isPlaying)
+            if (isPlaying) {
                 mediaControlPane.pause();
+                dCurrentPosition = mediaControlPane.getCurrentTime();
+            }
+            dCurrentPosition = mediaControlPane.getCurrentTime();
             helpController.setLocale(locale);
             helpController.scrollInto("main_header");
             openHelpCtrl();
-        if (isPlaying)
-            mediaControlPane.pauseOrPlay();
+       // if (isPlaying)
+         //   mediaControlPane.pauseOrPlay();
     }
 
     private void openHelpCtrl()
@@ -1792,6 +1800,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     protected void pressedLastDtBooks()
     {
         System.out.println("pressedLastDtBooks");
+      //  ddxx
     }
 
     @FXML
@@ -1799,7 +1808,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("About JavaFx Player");
-        alert.setHeaderText("About JavaFx Player v 1.0");
+        alert.setWidth(550);
+        alert.setHeaderText("About JavaFx Player v 1.1");
         String s ="This is a javafx player for listening music files, directories or daisy 2 book at the time.";
         alert.setContentText(s);
         // ObservableList<ButtonType> buttons = alert.getDialogPane().getButtonTypes();
@@ -2088,6 +2098,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                     // appIsClosing();
                     appIsClosing();
                     mediaControlPane.stop();
+                    dCurrentPosition = mediaControlPane.getCurrentTime();
                     Alert alert = new Alert(AlertType.INFORMATION);
                     alert.setTitle("JavaFx Player");
                     alert.setHeaderText("Changing user interface language by stopping and staring this application again.");
@@ -2159,7 +2170,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         if (bDebug)
             System.out.println("arrAudioFiles=" +arrAudioFiles);
         if (arrAudioFiles != null)
-            System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
+            if (bDebug) {
+                System.out.println("arrAudioFiles.length=" +arrAudioFiles.length);
+            }
         if (bDebug)
             System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
         if (bDebug)
@@ -2549,6 +2562,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                     webView.getEngine().setJavaScriptEnabled(true);
                      */
                     mediaControlPane.stop();
+                    dCurrentPosition = mediaControlPane.getCurrentTime();
                     try {
                         Thread.sleep(250);
                     }catch (Exception e){
@@ -2726,6 +2740,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
 
         deleteAllEarlierData();
         mediaControlPane.stop();
+        dCurrentPosition = mediaControlPane.getCurrentTime();
 
         if ( selectedFile != null && (!selectedFile.getName().endsWith(".html")
             && !selectedFile.getName().endsWith(".htm")))
@@ -2771,10 +2786,13 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                 updateSplitPaneDividerPosition();
                 Platform.runLater(new Runnable() {
                     public void run() {
+                        isUnderScrolling = true;
                         webEngine.load(daisyIndexFile.toURI().toString());
-                        // mediaControlPane.playThisFile(m_selectedFile, iBeginClip, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                    //    mediaControlPane.stop();
+                      //  mediaControlPane.playThisFile(m_selectedFile, iBeginClip, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
                       //  mediaControlPane.playThisFile(m_selectedFile, iBeginClip, iIndArrDirFiles,
                         //        arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                        isUnderScrolling = false;
                     }
                 });
             }
@@ -2943,6 +2961,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         listSmils.clear();
 
         mediaControlPane.stop();
+        dCurrentPosition = mediaControlPane.getCurrentTime();
         buttonNextTrack.setDisable(false);
         buttonPreviousTrack.setDisable(false);
         buttonPlay.setDisable(false);
@@ -3092,6 +3111,8 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         }
         if (hashMapScrolleds.containsKey(hrefid))
             return;
+
+        isUnderScrolling = true;
         strEarlierClickedUrl = null;
 
         hashMapScrolleds.put(hrefid,hrefid);
@@ -3142,6 +3163,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                     if (engine != null) {
                         try {
                             engine.executeScript(execJs);
+                            isUnderScrolling = false;
                         }catch (Exception e){
                             System.err.println("Js error: " +e.getMessage() );
                         }
@@ -4010,9 +4032,11 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         }
 
         if ((radioButtonESpeak.isSelected() || radioButtonFreeTts.isSelected())
-            && mediaControlPane.isPlaying())
-           // mediaControlPane.pauseOrPlay();
+            && mediaControlPane.isPlaying()) {
+            // mediaControlPane.pauseOrPlay();
             mediaControlPane.pause();
+            dCurrentPosition = mediaControlPane.getCurrentTime();
+        }
 
         if (radioButtonESpeak.isSelected())
         {
@@ -4058,10 +4082,13 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             }
         }
     }
+
     public void handleFocusIn(String href, String id, String text)
     {
         if (bDebug)
             System.out.println("handleFocusIn href=" +href +" id=" +id +" text=" +text);
+        if (isUnderScrolling)
+            return;
         possibleSpeekText(text);
         /*
         Audio audio = Audio.getInstance();
@@ -4116,6 +4143,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             public void run() {
     //    System.out.println("-2- href=" +href +" text=" +text);
         mediaControlPane.stop();
+        dCurrentPosition = mediaControlPane.getCurrentTime();
         bPreventIncreaseArrayIndex.set(true);
         // System.out.println("handleLinkClick href=" +href);
         String key = getKeyFromSmilHref(href);
@@ -4263,6 +4291,12 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             MenuItem source = (MenuItem)nodeObj;
             String id = source.getId();
             if (id != null){
+                boolean isPlaying = mediaControlPane.isPlaying();
+                if (isPlaying) {
+                    mediaControlPane.pause();
+                    dCurrentPosition = mediaControlPane.getCurrentTime();
+                }
+                dCurrentPosition = mediaControlPane.getCurrentTime();
                 helpController.scrollInto(id);
                 openHelpCtrl();
             }
@@ -4278,6 +4312,12 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             Control source = (Control)nodeObj;
             String id = source.getId();
             if (id != null){
+                boolean isPlaying = mediaControlPane.isPlaying();
+                if (isPlaying) {
+                    mediaControlPane.pause();
+                    dCurrentPosition = mediaControlPane.getCurrentTime();
+                }
+                dCurrentPosition = mediaControlPane.getCurrentTime();
                 helpController.scrollInto(id);
                // buttonHelp.setDisable(true);
                 openHelpCtrl();

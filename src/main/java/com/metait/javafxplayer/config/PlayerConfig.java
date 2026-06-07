@@ -18,6 +18,7 @@ public class PlayerConfig {
     public String userRadiobuttonSelected;
     public BookMark autoBookmark;
     public Locale userSelectedLocale;
+    public BookMarkCollection [] userEarlierFiles;
 
     private static String java_user_home = System.getProperty("user.home");
 
