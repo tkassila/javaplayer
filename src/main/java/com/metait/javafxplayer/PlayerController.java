@@ -164,7 +164,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
     private int iMaxSmilParLevelNormalPage = 0;
     private BookMarkController dialogController = null;
     private String scrolledWebLink = null;
-    private static final boolean bDebug = false;
+    public static final boolean bDebug = false;
 
     private DirectoryChooser directoryChooser = new DirectoryChooser();
     private File dirChooser = null;

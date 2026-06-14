@@ -477,7 +477,8 @@ public class MediaControlPane extends BorderPane {
             else
             {
                 Duration currTime = mp.getCurrentTime();
-                System.out.println("currTime=" +currTime.toMillis());
+                if (PlayerController.bDebug)
+                    System.out.println("currTime=" +currTime.toMillis());
                 Duration newPos;
                 if (direction == PAR_LEVEL_DIRECTION.DOWNWARD_PAR_LEVEL_DIRECTION)
                     newPos = currTime.add(Duration.millis(msecs));
@@ -497,6 +498,7 @@ public class MediaControlPane extends BorderPane {
             else
             {
                 Duration currTime = mp.getCurrentTime();
+                if (PlayerController.bDebug)
                 System.out.println("currTime=" +currTime.toMillis());
                 Duration newPos = null;
                 if (direction == PAR_LEVEL_DIRECTION.DOWNWARD_PAR_LEVEL_DIRECTION)
