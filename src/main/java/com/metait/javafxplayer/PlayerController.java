@@ -774,6 +774,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         }
         return ret;
     }
+
     private void seekPrevOrNextMediaGroupDatoToPlay(SmilData_ParGroup mediagroup, int iSelectedMetaLevel,
                                                     PAR_LEVEL_DIRECTION level_direction)
     {
@@ -786,7 +787,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             if (level_direction == PAR_LEVEL_DIRECTION.DOWNWARD_PAR_LEVEL_DIRECTION) {
                 if (playDuration < (playTime +this.currentTimeShift))
                 {
-                    NewSelectedFile newFile = getPossibleNextPlayfile();
+                    NewSelectedFile newFile = getPossibleNextPlayFile();
                     if (newFile == null)
                         return;
                     File newF = newFile.newSelectedfile;
@@ -794,9 +795,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                         return;
                     double newBeginTime = playDuration - (playTime -this.currentTimeShift);
                     if (newBeginTime < 1)
-                        mediaControlPane.playThisFile(newF, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                        mediaControlPane.playThisFile(newF, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
                     else {
-                        mediaControlPane.playThisFile(newF, newBeginTime, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                        mediaControlPane.playThisFile(newF, newBeginTime, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
                     }
                 }
                 else
@@ -813,9 +814,9 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                         return;
                     newBeginTime = getRestOfEndTime(newF, newBeginTime);
                     if (newBeginTime < 1)
-                        mediaControlPane.playThisFile(newF, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                        mediaControlPane.playThisFile(newF, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
                     else {
-                        mediaControlPane.playThisFile(newF, newBeginTime, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                        mediaControlPane.playThisFile(newF, newBeginTime, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
                     }
                 }
                 else
@@ -1019,7 +1020,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             if (new_selectedFile == null)
                 new_selectedFile = m_selectedFile;
             mediaControlPane.setIndArrDirFiles(indArr);
-            mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+            mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
             int indSelectedFile = indArr; // mediaControl.possibleNextTrack();
             if (indSelectedFile > -1 && bWebViewLoaded) {
                 scrollIntoWebView(indSelectedFile);
@@ -1053,7 +1054,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                 if (new_selectedFile == null)
                     new_selectedFile = m_selectedFile;
                 mediaControlPane.setIndArrDirFiles(indArr);
-                mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
                 int indSelectedFile = indArr; // mediaControl.possibleNextTrack();
                 if (indSelectedFile > -1 && bWebViewLoaded) {
                     scrollIntoWebView(indSelectedFile);
@@ -2337,7 +2338,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                         if (new_selectedFile == null)
                             new_selectedFile = m_selectedFile;
                         mediaControlPane.setIndArrDirFiles(indArr);
-                        mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+                        mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
                         int indSelectedFile = indArr; // mediaControl.possibleNextTrack();
                         if (indSelectedFile > -1 && bWebViewLoaded)
                         {
@@ -2439,7 +2440,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         if (new_selectedFile == null)
             new_selectedFile = m_selectedFile;
         mediaControlPane.setIndArrDirFiles(indArr);
-        mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+        mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
         int indSelectedFile = indArr; // mediaControl.possibleNextTrack();
         if (indSelectedFile > -1 && bWebViewLoaded)
         {
@@ -2465,7 +2466,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         double beginClip = sdpar.getClip_beginSeconds();
         int indArr = getIndArrOfListMp3Files(new_selectedFile);
         mediaControlPane.setIndArrDirFiles(indArr);
-        mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+        mediaControlPane.playThisFile(new_selectedFile, beginClip, indArr, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
     }
 
     private File getNewSelectedFileAfterCurrentFile(File mp3PlayFile, int addOrSubtract)
@@ -2991,7 +2992,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         }
         bPreventIncreaseArrayIndex.set(false);
         if (m_selectedFile != null) {
-            mediaControlPane.playThisFile(m_selectedFile, iBeginClip, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+            mediaControlPane.playThisFile(m_selectedFile, iBeginClip, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
         }
         /*
         if (!selectedFile.exists() || !selectedFile.isDirectory())
@@ -3004,7 +3005,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
          */
     }
 
-    public NewSelectedFile getPossibleNextPlayfile()
+    public NewSelectedFile getPossibleNextPlayFile()
     {
         NewSelectedFile ret = null;
         if (bDebug)
@@ -3048,6 +3049,53 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
         ret.newSelectedfile = m_selectedFile;
         bPreventIncreaseArrayIndex.set(false);
        // dddd
+        return ret;
+    }
+
+    public NewSelectedFile getPossiblePrevPlayFile()
+    {
+        NewSelectedFile ret = null;
+        if (bDebug)
+            System.out.println("bPreventIncreaseArrayIndex=" +bPreventIncreaseArrayIndex.toString());
+        if (bDebug)
+            System.out.println("arrAudioFiles=" +arrAudioFiles);
+        if (arrAudioFiles != null)
+            if (bDebug) {
+                System.out.println("arrAudioFiles.length=" + arrAudioFiles.length);
+            }
+        if (bDebug)
+            System.out.println("iIndArrDirFiles=" +iIndArrDirFiles);
+        if (bDebug)
+            System.out.println("");
+
+        if (bDebug)
+            System.out.println("");
+        if (bPreventIncreaseArrayIndex.get() || arrAudioFiles == null || arrAudioFiles.length == 0)
+            return null;
+        if (iIndArrDirFiles < 0 || iIndArrDirFiles >= arrAudioFiles.length)
+            return null;
+        boolean bValue = bPreventIncreaseArrayIndex.weakCompareAndSet(false, true);
+        if (!bValue)
+            return null;
+        int iNewInd = iIndArrDirFiles;
+        iNewInd--;
+        if (bDebug)
+            System.out.println("iNewInd=" +iNewInd);
+        if (iNewInd < 0 || iNewInd >= arrAudioFiles.length)
+        {
+            bPreventIncreaseArrayIndex.set(false);
+            return null;
+        }
+        iIndArrDirFiles = iNewInd;
+        m_selectedFile = arrAudioFiles[iIndArrDirFiles];
+        if (bDebug)
+            System.out.println("new m_selectedFile=" +m_selectedFile.getAbsolutePath());
+        ret = new NewSelectedFile();
+        ret.iSize = arrAudioFiles.length;
+        ret.iCounter = iIndArrDirFiles;
+        ret.newSelectedfile = m_selectedFile;
+        bPreventIncreaseArrayIndex.set(false);
+        // dddd
         return ret;
     }
 
@@ -3101,7 +3149,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             scrollIntoWebView(indSelectedFile);
         }
         updateSplitPaneDividerPosition();
-        mediaControlPane.playThisFile(m_selectedFile, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+        mediaControlPane.playThisFile(m_selectedFile, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
     }
 
     private void scrollIntoWebViewLinkKey(String hrefid)
@@ -3263,7 +3311,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             scrollIntoWebView(indSelectedFile);
         }
         updateSplitPaneDividerPosition();
-        mediaControlPane.playThisFile(m_selectedFile, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+        mediaControlPane.playThisFile(m_selectedFile, -1.0, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
         bPreventIncreaseArrayIndex.set(false);
     }
 
@@ -3442,7 +3490,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
             }
             mediaControlPane.stop();
             mediaControlPane.setIndArrDirFiles(iIndArrDirFiles);
-            mediaControlPane.playThisFile(m_selectedFile, dCurrentPosition, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "");
+            mediaControlPane.playThisFile(m_selectedFile, dCurrentPosition, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, "", -1);
             int indSelectedFile = iIndArrDirFiles; // mediaControl.possibleNextTrack();
             if (indSelectedFile > -1 && bWebViewLoaded)
             {
@@ -4187,7 +4235,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
          //  labelMsg.setAccessibleHelp(text);
         }
 
-        mediaControlPane.playThisFile(m_selectedFile, beginClip, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, text);
+        mediaControlPane.playThisFile(m_selectedFile, beginClip, iIndArrDirFiles, arrAudioFiles != null ? arrAudioFiles.length : 0, text, -1);
             }
         });
     }

@@ -34,15 +34,18 @@ public class MediaControlPane extends BorderPane {
 
     private MediaPlayer mp;
     private MediaView mediaView;
+    private MediaView mp2MediaView;
+    private MediaPlayer mp2;
     private boolean bRepeat = false;
-    private boolean stopRequested = false;
+    private volatile boolean stopRequested = false;
     private boolean atEndOfMedia = false;
-    private Duration duration;
+    private volatile Duration duration;
     private Slider timeSlider;
     private Label playTime;
     private Slider volumeSlider;
     private /* HBox */ FlowPane mediaBar;
     private Media buzzer;
+    private Media mp2Buzzer;
     private final Button playButton = new Button(">");
     // Define the cooldown duration (e.g., 3 seconds)
     Duration cooldownTime = Duration.seconds(3);
@@ -84,6 +87,8 @@ public class MediaControlPane extends BorderPane {
     private String strMediaPane_7;
     private String strMediaPane_8;
     private ICallParentOnEvery10Secs sec10Listener = null;
+    static Duration mp2Duration = new Duration(0);
+
     public int getTimeHop() {
         return iTimeHop;
     }
@@ -172,6 +177,8 @@ public class MediaControlPane extends BorderPane {
         m_parent = p_parent;
         setStyle("-fx-background-color: #bfc2c7;");
         mediaView = new MediaView();
+        mp2MediaView = new MediaView();
+
         Pane mvPane = new Pane() {
         };
         centerLabel.setPadding(new Insets(5, 10, 5, 10));
@@ -326,7 +333,7 @@ public class MediaControlPane extends BorderPane {
                         || status == MediaPlayer.Status.STOPPED) {
                     // rewind the movie if we're sitting at the end
                     if (atEndOfMedia) {
-                        mp.seek(mp.getStartTime());
+                    //    mp.seek(mp.getStartTime());
                         atEndOfMedia = false;
                     }
                     mp.play();
@@ -471,7 +478,7 @@ public class MediaControlPane extends BorderPane {
                 || status == MediaPlayer.Status.STOPPED) {
             // rewind the movie if we're sitting at the end
             if (atEndOfMedia) {
-                mp.seek(mp.getStartTime());
+             //   mp.seek(mp.getStartTime());
                 atEndOfMedia = false;
             }
             else
@@ -485,6 +492,12 @@ public class MediaControlPane extends BorderPane {
                     newPos = currTime.add(Duration.millis(msecs));
                 else {
                     newPos = currTime.subtract(Duration.millis(msecs));
+                }
+                if (newPos.isUnknown())
+                    return;
+                if (newPos.lessThan(new Duration(msecs)))
+                {
+                    possiblePreviousTrack(msecs);
                 }
                 mp.seek(newPos);
                 mp.setStartTime(newPos);
@@ -507,6 +520,11 @@ public class MediaControlPane extends BorderPane {
                     newPos = currTime.add(Duration.millis(msecs));
                 else
                     newPos = currTime.subtract(Duration.millis(msecs));
+                if (newPos.lessThan(new Duration(msecs)))
+                {
+                    possiblePreviousTrack(msecs);
+                    return;
+                }
                 mp.seek(newPos);
                 mp.setStartTime(newPos);
             }
@@ -614,7 +632,7 @@ public class MediaControlPane extends BorderPane {
     public void playFile(File selectedFile) {
         iIndArrDirFiles = 0;
         iArrDirFiles = 1;
-        playThisFile(selectedFile, -1.0, 0, 1, "");
+        playThisFile(selectedFile, -1.0, 0, 1, "", -1);
     }
 
     /*
@@ -647,7 +665,8 @@ public class MediaControlPane extends BorderPane {
     }
 
     public void playThisFile(File selectedFile, double beginClip,
-                             int p_iIndArrDirFiles, int iArraySize, String clickedText) {
+                             int p_iIndArrDirFiles, int iArraySize, String clickedText,
+                             int iTimeHop) {
         if(mp != null && mp.getStatus() == MediaPlayer.Status.PLAYING) {
             mp.stop();
             try {
@@ -738,6 +757,42 @@ public class MediaControlPane extends BorderPane {
                 // mp.setAutoPlay(false);
                 mp.setStartTime(Duration.millis((beginClip*1000)));
             }
+            else
+            {
+                if (iTimeHop > 0) {
+                    MediaPlayer.Status status = mp.getStatus();
+                    if (status == Status.PLAYING)
+                        mp.play();
+                    mp2Buzzer = new Media(strResource);
+                    MediaPlayer mp2 = new MediaPlayer(mp2Buzzer);
+                    mp2MediaView.setMediaPlayer(mp2);
+                    mp2.setAutoPlay(false);
+                    mp2.setOnReady(new Runnable() {
+                        public void run() {
+                            try {
+                            mp2Duration = mp2.getMedia().getDuration();
+                            Duration newBeginClip = mp2Duration.subtract(Duration.millis(iTimeHop));
+                            if (newBeginClip.toMillis() > 0)
+                                mp.setStartTime(Duration.millis(newBeginClip.toMillis()));
+                            mp2Buzzer = null;
+                            if (volume > 0.0)
+                            {
+                                mp.setVolume(volume);
+                                volumeSlider.setValue(volume);
+                            }
+                            mp.play();
+                            disAbleUserControls(false);
+                        }catch (Exception e2){
+                            e2.printStackTrace();
+                            disAbleUserControls(true);
+                        }
+                    }
+                    });
+                    mp2.setVolume(0);
+                    mp2.play();
+                    return;
+                }
+            }
             if (volume > 0.0)
             {
                 mp.setVolume(volume);
@@ -764,14 +819,14 @@ public class MediaControlPane extends BorderPane {
 
     private void possibleNextTrack()
     {
-        NewSelectedFile returndata = m_parent.getPossibleNextPlayfile();
-        if (returndata == null)
+        NewSelectedFile returnData = m_parent.getPossibleNextPlayFile();
+        if (returnData == null)
             return;
-        currentPlayFile = returndata.newSelectedfile;
-        iIndArrDirFiles = returndata.iCounter;
-        iArrDirFiles = returndata.iSize;
+        currentPlayFile = returnData.newSelectedfile;
+        iIndArrDirFiles = returnData.iCounter;
+        iArrDirFiles = returnData.iSize;
         if (currentPlayFile != null)
-            playThisFile(currentPlayFile, -1.0, iIndArrDirFiles, iArrDirFiles, "");
+            playThisFile(currentPlayFile, -1.0, iIndArrDirFiles, iArrDirFiles, "", -1);
         /*
         if (arrDirFiles == null || arrDirFiles.length == 0 || arrDirFiles.length <= iIndArrDirFiles)
             return -1;
@@ -788,29 +843,17 @@ public class MediaControlPane extends BorderPane {
         // iIndArrDirFiles;
     }
 
-    public int possiblePreviousTrack()
+    public int possiblePreviousTrack(int iTimeHop)
     {
-        if (m_selectedFile == null)
+        NewSelectedFile returnData = m_parent.getPossiblePrevPlayFile();
+        if (returnData == null)
             return -1;
-        /*
-        if (arrDirFiles == null || arrDirFiles.length == 0 || arrDirFiles.length <= (iIndArrDirFiles-1))
-            return -1;
-        if (iIndArrDirFiles == 0)
-            return -1;
-        int iIndArrDirFiles2 = iIndArrDirFiles -1;
-        if (0 > iIndArrDirFiles2)
-            return -1;
-        if (arrDirFiles.length <= iIndArrDirFiles2)
-            return -1;
-        iIndArrDirFiles = iIndArrDirFiles2;
-        currentPlayFile = arrDirFiles[iIndArrDirFiles];
-        if (currentPlayFile == null)
-            return -1;
-        // labelCounter.setText(" " +(iIndArrDirFiles+1) +" ");
-        playThisFile(currentPlayFile, -1.0);
-        return iIndArrDirFiles;
-         */
-        return -1;
+        currentPlayFile = returnData.newSelectedfile;
+        iIndArrDirFiles = returnData.iCounter;
+        iArrDirFiles = returnData.iSize;
+        if (currentPlayFile != null)
+            playThisFile(currentPlayFile, -1.0, iIndArrDirFiles, iArrDirFiles, "", iTimeHop);
+        return 1;
     }
 
     private void initMpAfterNewMp()
@@ -970,7 +1013,7 @@ public class MediaControlPane extends BorderPane {
                 || status == MediaPlayer.Status.STOPPED)) {
             // rewind the movie if we're sitting at the end
             if (atEndOfMedia) {
-                mp.seek(mp.getStartTime());
+              //  mp.seek(mp.getStartTime());
                 atEndOfMedia = false;
             }
             else

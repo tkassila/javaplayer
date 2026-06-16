@@ -5,5 +5,6 @@ import java.io.File;
 public interface IFileContainer {
     public void callUpdateSplitPaneDividerPosition(boolean bValue, String metadata);
     public boolean isVideoFile(File f);
-    public NewSelectedFile getPossibleNextPlayfile();
+    public NewSelectedFile getPossibleNextPlayFile();
+    public NewSelectedFile getPossiblePrevPlayFile();
 }
