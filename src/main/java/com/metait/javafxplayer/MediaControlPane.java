@@ -764,7 +764,7 @@ public class MediaControlPane extends BorderPane {
                     if (status == Status.PLAYING)
                         mp.play();
                     mp2Buzzer = new Media(strResource);
-                    MediaPlayer mp2 = new MediaPlayer(mp2Buzzer);
+                    mp2 = new MediaPlayer(mp2Buzzer);
                     mp2MediaView.setMediaPlayer(mp2);
                     mp2.setAutoPlay(false);
                     mp2.setOnReady(new Runnable() {
