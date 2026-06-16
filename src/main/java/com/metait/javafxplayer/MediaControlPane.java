@@ -477,8 +477,9 @@ public class MediaControlPane extends BorderPane {
             else
             {
                 Duration currTime = mp.getCurrentTime();
-                if (PlayerController.bDebug)
-                    System.out.println("currTime=" +currTime.toMillis());
+                if (PlayerController.bDebug) {
+                    System.out.println("currTime=" + currTime.toMillis());
+                }
                 Duration newPos;
                 if (direction == PAR_LEVEL_DIRECTION.DOWNWARD_PAR_LEVEL_DIRECTION)
                     newPos = currTime.add(Duration.millis(msecs));
@@ -498,8 +499,9 @@ public class MediaControlPane extends BorderPane {
             else
             {
                 Duration currTime = mp.getCurrentTime();
-                if (PlayerController.bDebug)
-                System.out.println("currTime=" +currTime.toMillis());
+                if (PlayerController.bDebug) {
+                    System.out.println("currTime=" + currTime.toMillis());
+                }
                 Duration newPos = null;
                 if (direction == PAR_LEVEL_DIRECTION.DOWNWARD_PAR_LEVEL_DIRECTION)
                     newPos = currTime.add(Duration.millis(msecs));
@@ -822,7 +824,9 @@ public class MediaControlPane extends BorderPane {
         mp.currentTimeProperty().addListener(new ChangeListener<Duration>() {
             @Override
             public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-                //of stopping the double commit.
+                //of stopping the double commit.re
+                if (newValue.isUnknown())
+                    return;
                 currentTime = newValue;
                 iSecondsIncurrentTime = new Double(currentTime.toSeconds()).intValue();
               //  System.out.println("" +iSeconsdIncurrentTime);
@@ -856,7 +860,7 @@ public class MediaControlPane extends BorderPane {
         mp.setOnPaused(new Runnable() {
             public void run() {
           //     System.out.println("onPaused");
-             //   duration = mp.getMedia().getDuration();
+                duration = mp.getMedia().getDuration();
                // duration = duration.subtract(new Duration(2000));
                     Platform.runLater(new Runnable() {
                         public void run() {
