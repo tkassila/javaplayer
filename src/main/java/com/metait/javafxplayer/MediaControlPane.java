@@ -772,8 +772,11 @@ public class MediaControlPane extends BorderPane {
                             try {
                             mp2Duration = mp2.getMedia().getDuration();
                             Duration newBeginClip = mp2Duration.subtract(Duration.millis(iTimeHop));
-                            if (newBeginClip.toMillis() > 0)
+                            if (newBeginClip.toMillis() > 0) {
+                                mp.seek(newBeginClip);
                                 mp.setStartTime(Duration.millis(newBeginClip.toMillis()));
+                                duration = mp.getTotalDuration();
+                            }
                             mp2Buzzer = null;
                             if (volume > 0.0)
                             {
