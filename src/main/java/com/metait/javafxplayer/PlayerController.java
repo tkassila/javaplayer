@@ -3140,7 +3140,7 @@ public class PlayerController implements IFileContainer, IParLevelSetter, ICallP
                 "    // Tyhjennetään vanhat valinnat ja asetetaan uusi tekstivalinta\n" +
                 "    selection.removeAllRanges();\n" +
                 "    selection.addRange(range);\n" +
-                "  }, 500); \n" +
+                "  }, 1500); \n" +
                 "}";
 
         /*
